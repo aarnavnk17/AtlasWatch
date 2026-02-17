@@ -35,7 +35,6 @@ class _SignupScreenState extends State<SignupScreen> {
       final auth = AuthService();
       final error = await auth.register(
         email: email,
-        username: username,
         password: password,
       );
 

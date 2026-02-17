@@ -7,7 +7,6 @@ class AuthService {
 
   Future<String?> register({
     required String email,
-    required String username,
     required String password,
   }) async {
     final response = await http.post(
@@ -15,7 +14,6 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
-        'username': username,
         'password': password,
       }),
     ).timeout(const Duration(seconds: 10));

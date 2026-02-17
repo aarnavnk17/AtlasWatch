@@ -119,7 +119,6 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       email TEXT PRIMARY KEY,
-      username TEXT UNIQUE,
       password TEXT NOT NULL
     )
   `);
@@ -150,19 +149,19 @@ db.serialize(() => {
 // REGISTER
 // ============================
 app.post('/register', (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!email || !username || !password) {
+  if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Email, username, and password are required',
-      error: 'Email, username, and password are required'
+      message: 'Email and password are required',
+      error: 'Email and password are required'
     });
   }
 
   db.run(
-    `INSERT INTO users (email, username, password) VALUES (?, ?, ?)`,
-    [email, username, password],
+    `INSERT INTO users (email, password) VALUES (?, ?)`,
+    [email, password],
     function (err) {
       if (err) {
         console.error('Registration error:', err.message);
@@ -179,7 +178,7 @@ app.post('/register', (req, res) => {
         });
       }
 
-      console.log(`User registered: ${email} (${username})`);
+      console.log(`User registered: ${email}`);
       res.json({ success: true });
     }
   );
@@ -189,19 +188,19 @@ app.post('/register', (req, res) => {
 // LOGIN (Supports Email or Username)
 // ============================
 app.post('/login', (req, res) => {
-  const { identifier, password } = req.body; // identifier can be email or username
+  const { email, password } = req.body; // email is required
 
-  if (!identifier || !password) {
+  if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Email/Username and password are required',
-      error: 'Email/Username and password are required'
+      message: 'Email and password are required',
+      error: 'Email and password are required'
     });
   }
 
   db.get(
-    `SELECT * FROM users WHERE (email = ? OR username = ?) AND password = ?`,
-    [identifier, identifier, password],
+    `SELECT * FROM users WHERE email = ? AND password = ?`,
+    [email, password],
     (err, row) => {
       if (err) {
         console.error('Login database error:', err.message);
@@ -214,7 +213,7 @@ app.post('/login', (req, res) => {
 
       if (row) {
         console.log(`User logged in: ${row.email}`);
-        res.json({ success: true, email: row.email, username: row.username });
+        res.json({ success: true, email: row.email });
       } else {
         res.status(401).json({
           success: false,
