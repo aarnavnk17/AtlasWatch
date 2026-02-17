@@ -20,7 +20,7 @@ class _SosScreenState extends State<SosScreen> {
     try {
       // 1. Get Location (High Accuracy)
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
 
       // 2. Fetch Contacts

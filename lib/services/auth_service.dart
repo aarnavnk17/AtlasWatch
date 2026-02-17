@@ -18,7 +18,7 @@ class AuthService {
         'username': username,
         'password': password,
       }),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       return null;
@@ -36,7 +36,7 @@ class AuthService {
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       return null;

@@ -72,7 +72,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
               const SizedBox(height: 12),
 
               DropdownButtonFormField<String>(
-                value: _mode,
+                initialValue: _mode,
                 items: const [
                   DropdownMenuItem(value: 'Car', child: Text('Car')),
                   DropdownMenuItem(value: 'Train', child: Text('Train')),

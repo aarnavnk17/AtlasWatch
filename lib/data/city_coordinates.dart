@@ -146,7 +146,7 @@ class CityCoordinates {
     'Jaipur': const LatLng(26.9124, 75.7873),
     'Jodhpur': const LatLng(26.2389, 73.0243),
     'Kota': const LatLng(25.2138, 75.8648),
-    'Udaipur': const LatLng(24.5854, 73.7125),
+    'Udaipur (RJ)': const LatLng(24.5854, 73.7125),
     'Ajmer': const LatLng(26.4499, 74.6399),
 
     // Sikkim
@@ -173,7 +173,7 @@ class CityCoordinates {
     // Tripura
     'Agartala': const LatLng(23.8315, 91.2868),
     'Dharmanagar': const LatLng(24.3794, 92.1691),
-    'Udaipur': const LatLng(23.5350, 91.4883),
+    'Udaipur (TR)': const LatLng(23.5350, 91.4883),
     'Kailashahar': const LatLng(24.3263, 92.0164),
     'Belonia': const LatLng(23.2505, 91.4552),
 

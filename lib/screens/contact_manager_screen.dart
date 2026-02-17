@@ -45,6 +45,7 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
           final phone = fullContact.phones.first.number;
           
           await _contactService.addContact(name, phone, 'Imported');
+          if (!mounted) return;
           _loadContacts();
         }
       }
@@ -83,7 +84,8 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
               _nameController.clear();
               _phoneController.clear();
               _relationController.clear();
-              if (mounted) Navigator.pop(context);
+              if (!context.mounted) return;
+              Navigator.pop(context);
               _loadContacts();
             },
             child: const Text('Save'),
@@ -121,6 +123,7 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () async {
                           await _contactService.deleteContact(contact.id!);
+                          if (!mounted) return;
                           _loadContacts();
                         },
                       ),

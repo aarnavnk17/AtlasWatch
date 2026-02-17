@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import '../models/risk_level.dart';
 import '../services/session_service.dart';
@@ -65,6 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
       } catch (e) {
           debugPrint('Error geocoding custom location: $e');
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(content: Text('Could not find location: $customLocation')),
           );
@@ -96,9 +96,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (result != null) {
         final newLatLng = LatLng(result.position.latitude, result.position.longitude);
         setState(() {
-          _locationName = result.address;
           _loadingLocation = false;
           _currentLatLng = newLatLng;
+          _locationName = result.address; // Moved this line here for correct order
         });
 
         // Fetch Risk if address is available

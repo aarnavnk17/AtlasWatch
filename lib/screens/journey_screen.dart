@@ -76,12 +76,12 @@ class _JourneyScreenState extends State<JourneyScreen> {
 
       if (start != null && end != null) {
         // 3. Fetch Actual Route from OSRM
-        List<LatLng> routePoints = [start!, end!]; // Default straight line
+        List<LatLng> routePoints = [start, end]; // Default straight line
         
         try {
             // OSRM Public Server (Driving)
             final url = Uri.parse(
-                'https://router.project-osrm.org/route/v1/driving/${start!.longitude},${start!.latitude};${end!.longitude},${end!.latitude}?overview=full&geometries=geojson'
+                'https://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson'
             );
             
             final response = await http.get(url);

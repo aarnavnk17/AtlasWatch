@@ -55,6 +55,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     if (success) {
       await _session.setProfileComplete(true);
 
+      if (!mounted) return;
+
       if (!widget.isEditMode) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -67,9 +69,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         );
       }
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to save profile')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save profile')),
+        );
+      }
     }
   }
 

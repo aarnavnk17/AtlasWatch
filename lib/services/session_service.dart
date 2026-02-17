@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'backend_service.dart';
@@ -17,7 +18,7 @@ class SessionService {
       uri,
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'identifier': identifier, 'password': password}),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -61,7 +62,7 @@ class SessionService {
 
     final uri = Uri.parse('${BackendService.baseUrl}/profile?email=$email');
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 5));
+    final response = await http.get(uri).timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) {
       return false;
@@ -90,7 +91,7 @@ class SessionService {
 
     final uri = Uri.parse('${BackendService.baseUrl}/profile?email=$email');
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 5));
+    final response = await http.get(uri).timeout(const Duration(seconds: 10));
 
     if (response.statusCode != 200) return null;
 
@@ -129,10 +130,10 @@ class SessionService {
         'documentType': documentType,
         'nationality': nationality,
       }),
-    ).timeout(const Duration(seconds: 5));
+    ).timeout(const Duration(seconds: 10));
 
-    print("PROFILE STATUS: ${response.statusCode}");
-    print("PROFILE RESPONSE: ${response.body}");
+    debugPrint("PROFILE STATUS: ${response.statusCode}");
+    debugPrint("PROFILE RESPONSE: ${response.body}");
 
     return response.statusCode == 200;
   }
