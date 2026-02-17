@@ -88,38 +88,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final locationService = LocationService();
     
     // Fetch location result which contains both position and address
-    final result = await locationService.fetchCurrentLocation();
-    
-    if (!mounted) return;
-
-    if (result != null) {
-      final newLatLng = LatLng(result.position.latitude, result.position.longitude);
-      setState(() {
-        _locationName = result.address;
-        _loadingLocation = false;
-        _currentLatLng = newLatLng;
-      });
+    try {
+      final result = await locationService.fetchCurrentLocation();
       
+      if (!mounted) return;
 
-
-      // Fetch Risk if address is available
-      if (result.address != null) {
-        final crimeService = CrimeService();
-        final riskService = RiskService();
-
-        final score = await crimeService.fetchCrimeScore(result.address!);
-
-        if (!mounted) return;
-
+      if (result != null) {
+        final newLatLng = LatLng(result.position.latitude, result.position.longitude);
         setState(() {
-          _riskLevel = riskService.calculateRisk(score);
+          _locationName = result.address;
+          _loadingLocation = false;
+          _currentLatLng = newLatLng;
+        });
+
+        // Fetch Risk if address is available
+        if (result.address != null) {
+          final crimeService = CrimeService();
+          final riskService = RiskService();
+
+          final score = await crimeService.fetchCrimeScore(result.address!);
+
+          if (!mounted) return;
+
+          setState(() {
+            _riskLevel = riskService.calculateRisk(score);
+          });
+        }
+      } else {
+          setState(() {
+              _loadingLocation = false;
+              _locationName = null;
+          });
+      }
+    } catch (e) {
+      debugPrint('Error fetching location: $e');
+      if (mounted) {
+        setState(() {
+          _loadingLocation = false;
+          _locationName = 'Location unavailable (timeout)';
         });
       }
-    } else {
-        setState(() {
-            _loadingLocation = false;
-            _locationName = null;
-        });
     }
   }
   

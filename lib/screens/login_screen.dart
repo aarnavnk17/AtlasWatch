@@ -17,47 +17,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _loading = false;
 
-  Future<void> _handleLogin() async {
-    setState(() {
-      _loading = true;
-    });
-
-    final session = SessionService();
-
-    final success = await session.login(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-
-    if (!mounted) return;
-
-    setState(() {
-      _loading = false;
-    });
-
-    if (!success) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Invalid credentials')));
-      return;
-    }
-
-    final profileComplete = await session.isProfileComplete();
-
-    if (!mounted) return;
-
-    if (!profileComplete) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ProfileSetupScreen(isEditMode: false),
-        ),
+    try {
+      final success = await session.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
-      );
+
+      if (!mounted) return;
+
+      if (!success) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Invalid credentials')));
+        return;
+      }
+
+      final profileComplete = await session.isProfileComplete();
+
+      if (!mounted) return;
+
+      setState(() {
+        _loading = false;
+      });
+
+      if (!profileComplete) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProfileSetupScreen(isEditMode: false),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      }
+    } catch (e) {
+      debugPrint("Login Error: $e");
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${e.toString()}')),
+        );
+      }
     }
   }
 

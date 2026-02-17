@@ -26,16 +26,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _initialize() async {
-    final profile = await _session.loadProfile();
+    try {
+      final profile = await _session.loadProfile();
 
-    if (profile != null) {
-      _passportController.text = profile['passport'] ?? '';
-      _documentTypeController.text = profile['documentType'] ?? '';
-      _nationalityController.text = profile['nationality'] ?? '';
-    }
-
-    if (mounted) {
-      setState(() => _loading = false);
+      if (profile != null) {
+        _passportController.text = profile['passport'] ?? '';
+        _documentTypeController.text = profile['documentType'] ?? '';
+        _nationalityController.text = profile['nationality'] ?? '';
+      }
+    } catch (e) {
+      debugPrint("ProfileSetup Error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 

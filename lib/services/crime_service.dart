@@ -8,7 +8,7 @@ class CrimeService {
       '${BackendService.baseUrl}/crime-stats?area=${area.toLowerCase()}',
     );
 
-    final response = await http.get(uri);
+    final response = await http.get(uri).timeout(const Duration(seconds: 5));
 
     if (response.statusCode != 200) {
       return 0;

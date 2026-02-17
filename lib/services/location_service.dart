@@ -23,7 +23,9 @@ class LocationService {
 
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
-    );
+    ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw Exception('Location request timed out');
+    });
 
     String? address;
     try {

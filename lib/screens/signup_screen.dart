@@ -31,28 +31,40 @@ class _SignupScreenState extends State<SignupScreen> {
       _loading = true;
     });
 
-    final auth = AuthService();
-    final error = await auth.register(
-      email: email,
-      username: username,
-      password: password,
-    );
+    try {
+      final auth = AuthService();
+      final error = await auth.register(
+        email: email,
+        username: username,
+        password: password,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _loading = false;
-    });
+      setState(() {
+        _loading = false;
+      });
 
-    if (error == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Signup successful')));
-      Navigator.pop(context); // Return to login screen
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      if (error == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Signup successful')));
+        Navigator.pop(context); // Return to login screen
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error)));
+      }
+    } catch (e) {
+      debugPrint("Signup Error: $e");
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signup failed: ${e.toString()}')),
+        );
+      }
     }
   }
 

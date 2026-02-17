@@ -43,19 +43,25 @@ class EntryGate extends StatelessWidget {
 
   Future<Widget> _decideStartScreen() async {
     final session = SessionService();
-    final loggedIn = await session.isLoggedIn();
+    try {
+      final loggedIn = await session.isLoggedIn();
 
-    if (!loggedIn) {
+      if (!loggedIn) {
+        return const LoginScreen();
+      }
+
+      final profileComplete = await session.isProfileComplete();
+
+      if (!profileComplete) {
+        return const ProfileSetupScreen(isEditMode: false);
+      }
+
+      return const DashboardScreen();
+    } catch (e) {
+      debugPrint("EntryGate Error: $e");
+      // Fallback to Login Screen on error (e.g. server down)
       return const LoginScreen();
     }
-
-    final profileComplete = await session.isProfileComplete();
-
-    if (!profileComplete) {
-      return const ProfileSetupScreen(isEditMode: false);
-    }
-
-    return const DashboardScreen();
   }
 
   @override
@@ -63,6 +69,29 @@ class EntryGate extends StatelessWidget {
     return FutureBuilder(
       future: _decideStartScreen(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 16),
+                  const Text("An error occurred during startup"),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Restart the process
+                      (context as Element).markNeedsBuild();
+                    },
+                    child: const Text("Retry"),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
