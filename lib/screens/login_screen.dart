@@ -16,6 +16,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _loading = false;
+  Future<void> _handleLogin() async {
+    setState(() {
+      _loading = true;
+    });
+
+    final session = SessionService();
 
     try {
       final success = await session.login(
