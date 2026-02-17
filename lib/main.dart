@@ -4,15 +4,7 @@ import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/profile_setup_screen.dart';
 
-import 'services/geofence_service.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Geofencing
-  final geofenceService = GeofenceService();
-  await geofenceService.initialize();
-
+void main() {
   runApp(const AtlasWatchApp());
 }
 
