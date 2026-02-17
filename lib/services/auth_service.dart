@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'backend_service.dart';
 
 class AuthService {
-  static const String baseUrl = BackendService.baseUrl;
+  static String get baseUrl => BackendService.baseUrl;
 
   Future<String?> register({
     required String email,
