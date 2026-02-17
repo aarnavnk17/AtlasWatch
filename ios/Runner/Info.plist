@@ -52,5 +52,11 @@
 	</dict>
 	<key>NSContactsUsageDescription</key>
 	<string>This app requires contact access to allow you to add emergency contacts easily.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AtlasWatch needs your location to track your journey and provide risk analysis.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>AtlasWatch needs your location in the background for geofencing and emergency SOS alerts.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>AtlasWatch needs your location to ensure your safety during journeys, even when the app is closed.</string>
 </dict>
 </plist>

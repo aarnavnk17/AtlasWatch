@@ -12,6 +12,7 @@ import 'profile_setup_screen.dart';
 import 'journey_details_screen.dart';
 import 'sos_screen.dart';
 import 'contact_manager_screen.dart';
+import '../services/geofence_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -30,18 +31,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   LatLng _currentLatLng = const LatLng(0, 0);
   
   final TextEditingController _locationController = TextEditingController();
-
-  @override
-  void dispose() {
-    _locationController.dispose();
-    super.dispose();
-  }
+  final GeofenceService _geofenceService = GeofenceService();
+  List<Map<String, dynamic>> _safeZones = [];
 
   @override
   void initState() {
     super.initState();
     _fetchLocationAndRisk();
+    _loadSafeZones();
   }
+
+  Future<void> _loadSafeZones() async {
+      final zones = await _geofenceService.getRegisteredGeofences();
+      setState(() => _safeZones = zones);
+  }
+
+  Future<void> _addCurrentAsSafeZone() async {
+      final String id = "Zone_${DateTime.now().millisecondsSinceEpoch}";
+      await _geofenceService.addSafeZone(
+          id: id,
+          latitude: _currentLatLng.latitude,
+          longitude: _currentLatLng.longitude,
+          radiusInMeters: 200, // 200m radius
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Safe Zone added at current location!')),
+      );
+      _loadSafeZones();
+  }
+
+  Future<void> _removeSafeZone(String id) async {
+      await _geofenceService.removeZone(id);
+      _loadSafeZones();
+  }
+
   
   Future<void> _simulateLocation(String customLocation) async {
       if (customLocation.isEmpty) return;
@@ -239,33 +262,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             const SizedBox(height: 10),
 
-            // 🧪 Manual Override (For Testing)
+            // 🏘️ geofence management
             ExpansionTile(
-              title: const Text('Dev: Simulate Location', style: TextStyle(fontSize: 12)),
+              leading: const Icon(Icons.location_on, color: Colors.teal),
+              title: const Text('Manage Safe Zones'),
+              subtitle: Text('${_safeZones.length} zones active'),
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _locationController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter city (e.g. New York)',
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _simulateLocation(_locationController.text),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.add_location),
+                        label: const Text('Add Current Location as Safe Zone'),
+                        onPressed: _loadingLocation ? null : _addCurrentAsSafeZone,
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber,
-                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.teal.shade700,
+                            foregroundColor: Colors.white,
                         ),
-                        child: const Text('Simulate'),
                       ),
+                      const SizedBox(height: 8),
+                      ..._safeZones.map((zone) => ListTile(
+                        dense: true,
+                        title: Text('Radius: ${zone['radius']}m'),
+                        subtitle: Text('Lat: ${zone['lat'].toStringAsFixed(3)}, Lng: ${zone['lng'].toStringAsFixed(3)}'),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _removeSafeZone(zone['id']),
+                        ),
+                      )),
                     ],
                   ),
                 ),
@@ -273,6 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
 
             const SizedBox(height: 10),
+
             
 
 
