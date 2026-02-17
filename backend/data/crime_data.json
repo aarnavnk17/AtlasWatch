@@ -1,0 +1,1611 @@
+{
+    "Andhra Pradesh": {
+        "Visakhapatnam": {
+            "risk": "Low",
+            "score": 2800,
+            "areas": {
+                "Gajuwaka": 300,
+                "MVP Colony": 250,
+                "Jagadamba Junction": 400,
+                "Siripuram": 350,
+                "Maharanipeta": 300
+            }
+        },
+        "Vijayawada": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Benz Circle": 600,
+                "Patamata": 500,
+                "Governorpet": 400,
+                "Satyanarayanapuram": 300,
+                "Bhavanipuram": 450
+            }
+        },
+        "Guntur": {
+            "risk": "Medium",
+            "score": 4100,
+            "areas": {
+                "Arundelpet": 500,
+                "Brodiepet": 450,
+                "Vidyanagar": 400,
+                "Pattabhipuram": 350,
+                "Lalapet": 400
+            }
+        },
+        "Nellore": {
+            "risk": "Low",
+            "score": 3200,
+            "areas": {
+                "Magunta Layout": 300,
+                "Dargamitta": 400,
+                "Trunk Road": 500,
+                "Vedayapalem": 350,
+                "Pogathota": 300
+            }
+        },
+        "Kurnool": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "C Camp": 400,
+                "Nandyal Check Post": 500,
+                "Park Road": 450,
+                "Gayathri Estate": 350,
+                "Venkatramana Colony": 400
+            }
+        }
+    },
+    "Arunachal Pradesh": {
+        "Itanagar": {
+            "risk": "Low",
+            "score": 1500,
+            "areas": {
+                "Ganga Market": 200,
+                "Naharlagun": 250,
+                "Niti Vihar": 150,
+                "Bank Tinali": 300,
+                "Chandranagar": 200
+            }
+        },
+        "Tawang": {
+            "risk": "Low",
+            "score": 800,
+            "areas": {
+                "Old Market": 100,
+                "New Market": 150,
+                "Nehru Market": 120,
+                "Circuit House Area": 80,
+                "Monastery Area": 50
+            }
+        },
+        "Pasighat": {
+            "risk": "Low",
+            "score": 1200,
+            "areas": {
+                "Banskota": 150,
+                "Pertin Nagar": 180,
+                "Mirku": 120,
+                "High Region": 100,
+                "GTC": 130
+            }
+        },
+        "Ziro": {
+            "risk": "Low",
+            "score": 900,
+            "areas": {
+                "Hapoli": 150,
+                "Old Ziro": 100,
+                "Hong Village": 80,
+                "Hari Village": 90,
+                "Siiro": 70
+            }
+        },
+        "Bomdila": {
+            "risk": "Low",
+            "score": 1000,
+            "areas": {
+                "Bazaar Line": 150,
+                "Pedung": 100,
+                "Sera": 120,
+                "Singchung": 100,
+                "Rupa": 110
+            }
+        }
+    },
+    "Assam": {
+        "Guwahati": {
+            "risk": "High",
+            "score": 7500,
+            "areas": {
+                "Paltan Bazar": 1100,
+                "Fancy Bazar": 1200,
+                "Ganeshguri": 900,
+                "Dispur": 800,
+                "Chandmari": 700
+            }
+        },
+        "Silchar": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Tarapur": 600,
+                "Ambicapatty": 500,
+                "Meherpur": 400,
+                "Sadarghat": 550,
+                "Rangirkhari": 450
+            }
+        },
+        "Dibrugarh": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Chowkidinghee": 500,
+                "Amolapatty": 450,
+                "Khaliamari": 400,
+                "Jalan Nagar": 350,
+                "Mancotta Road": 500
+            }
+        },
+        "Jorhat": {
+            "risk": "Medium",
+            "score": 4000,
+            "areas": {
+                "Gar-Ali": 600,
+                "Atilagaon": 500,
+                "Baruah Chariali": 450,
+                "Choladhora": 400,
+                "Titabar": 350
+            }
+        },
+        "Tezpur": {
+            "risk": "Low",
+            "score": 3200,
+            "areas": {
+                "Mission Chariali": 400,
+                "Tribeni": 350,
+                "Mahabhairab": 300,
+                "Poruwa": 250,
+                "Dekargaon": 300
+            }
+        }
+    },
+    "Bihar": {
+        "Patna": {
+            "risk": "High",
+            "score": 9800,
+            "areas": {
+                "Kankarbagh": 1400,
+                "Rajendra Nagar": 1200,
+                "Bailey Road": 1100,
+                "Patliputra Colony": 1000,
+                "Boring Road": 1300
+            }
+        },
+        "Gaya": {
+            "risk": "High",
+            "score": 7500,
+            "areas": {
+                "Civil Lines": 900,
+                "Rampur": 800,
+                "Chowk": 1100,
+                "Delha": 1000,
+                "Manpur": 900
+            }
+        },
+        "Muzaffarpur": {
+            "risk": "High",
+            "score": 8200,
+            "areas": {
+                "Mithanpura": 1000,
+                "Sadar": 1100,
+                "Brahmpura": 900,
+                "Aghoria Bazar": 800,
+                "Motijheel": 1200
+            }
+        },
+        "Bhagalpur": {
+            "risk": "High",
+            "score": 7800,
+            "areas": {
+                "Adampur": 800,
+                "Khalifabag": 1000,
+                "Tilkamanjhi": 900,
+                "Ishakchak": 850,
+                "Mojahidpur": 950
+            }
+        },
+        "Darbhanga": {
+            "risk": "Medium",
+            "score": 6500,
+            "areas": {
+                "Laheriasarai": 900,
+                "Donar": 800,
+                "Beta": 700,
+                "Kadirabad": 750,
+                "Laxmisagar": 600
+            }
+        }
+    },
+    "Chhattisgarh": {
+        "Raipur": {
+            "risk": "Medium",
+            "score": 5800,
+            "areas": {
+                "Civil Lines": 600,
+                "Pandri": 700,
+                "Shankar Nagar": 500,
+                "Telibandha": 650,
+                "Tatibandh": 550
+            }
+        },
+        "Bhilai": {
+            "risk": "Low",
+            "score": 3500,
+            "areas": {
+                "Nehru Nagar": 400,
+                "Civic Center": 500,
+                "Supela": 600,
+                "Risali": 350,
+                "Sector 6": 450
+            }
+        },
+        "Bilaspur": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Vyapar Vihar": 500,
+                "Nehru Nagar": 450,
+                "Sarkanda": 550,
+                "Link Road": 400,
+                "Civil Lines": 500
+            }
+        },
+        "Korba": {
+            "risk": "Medium",
+            "score": 4000,
+            "areas": {
+                "TP Nagar": 500,
+                "Niharika": 450,
+                "Kosabadi": 400,
+                "Rampur": 350,
+                "Balco": 300
+            }
+        },
+        "Durg": {
+            "risk": "Medium",
+            "score": 4100,
+            "areas": {
+                "Padmanabhpur": 400,
+                "Mohan Nagar": 500,
+                "Indira Market": 600,
+                "Ganjpara": 550,
+                "Green Chowk": 450
+            }
+        }
+    },
+    "Goa": {
+        "Panaji": {
+            "risk": "Low",
+            "score": 2500,
+            "areas": {
+                "Miramar": 300,
+                "Altinho": 200,
+                "Fontainhas": 250,
+                "Campal": 300,
+                "Patto": 400
+            }
+        },
+        "Margao": {
+            "risk": "Low",
+            "score": 2800,
+            "areas": {
+                "Fatorda": 350,
+                "Comba": 300,
+                "Aquem": 250,
+                "Navelim": 280,
+                "Borda": 320
+            }
+        },
+        "Vasco da Gama": {
+            "risk": "Low",
+            "score": 2700,
+            "areas": {
+                "Baina": 400,
+                "Mangor Hill": 300,
+                "Vaddem": 350,
+                "Chicalim": 250,
+                "Dabolim": 300
+            }
+        },
+        "Mapusa": {
+            "risk": "Low",
+            "score": 2600,
+            "areas": {
+                "Khorlim": 300,
+                "Angod": 250,
+                "Cmm": 280,
+                "Dangui Colony": 260,
+                "Ansabhat": 240
+            }
+        },
+        "Ponda": {
+            "risk": "Low",
+            "score": 2200,
+            "areas": {
+                "Tisk": 250,
+                "Upper Bazaar": 300,
+                "Khadpabandh": 200,
+                "Curti": 180,
+                "Farmagudi": 220
+            }
+        }
+    },
+    "Gujarat": {
+        "Ahmedabad": {
+            "risk": "High",
+            "score": 15190,
+            "areas": {
+                "Satellite": 1500,
+                "Navrangpura": 1200,
+                "Maninagar": 2000,
+                "Gota": 1800,
+                "Vastrapur": 1600
+            }
+        },
+        "Surat": {
+            "risk": "High",
+            "score": 16750,
+            "areas": {
+                "Adajan": 2500,
+                "Vesu": 1800,
+                "Varachha": 3000,
+                "Piplod": 1500,
+                "Rander": 2200
+            }
+        },
+        "Vadodara": {
+            "risk": "Medium",
+            "score": 5200,
+            "areas": {
+                "Alkapuri": 600,
+                "Karelibaug": 900,
+                "Fatehgunj": 800,
+                "Manjalpur": 1000,
+                "Gotri": 700
+            }
+        },
+        "Rajkot": {
+            "risk": "Medium",
+            "score": 5500,
+            "areas": {
+                "Kalavad Road": 700,
+                "Amin Marg": 800,
+                "Raiya Road": 900,
+                "Bhaktinagar": 1100,
+                "Mavdi": 1000
+            }
+        },
+        "Bhavnagar": {
+            "risk": "Low",
+            "score": 3800,
+            "areas": {
+                "Waghawadi Road": 500,
+                "Kaliyak": 600,
+                "Sardar Nagar": 400,
+                "Subhashnagar": 700,
+                "Kumbharwada": 900
+            }
+        }
+    },
+    "Haryana": {
+        "Gurugram": {
+            "risk": "High",
+            "score": 8500,
+            "areas": {
+                "DLF Phase 1": 1000,
+                "Sector 56": 1200,
+                "Sohna Road": 1100,
+                "MG Road": 1300,
+                "Udyog Vihar": 900
+            }
+        },
+        "Faridabad": {
+            "risk": "High",
+            "score": 8200,
+            "areas": {
+                "Sector 15": 900,
+                "NIT": 1200,
+                "Old Faridabad": 1100,
+                "Surajkund": 800,
+                "Ballabgarh": 1300
+            }
+        },
+        "Panipat": {
+            "risk": "High",
+            "score": 7800,
+            "areas": {
+                "Model Town": 900,
+                "GT Road": 1000,
+                "Sector 12": 800,
+                "Tehsil Camp": 1100,
+                "Sanauli Road": 950
+            }
+        },
+        "Ambala": {
+            "risk": "Medium",
+            "score": 5500,
+            "areas": {
+                "Ambala Cantt": 700,
+                "Model Town": 600,
+                "Sector 7": 500,
+                "Prem Nagar": 650,
+                "Jagadhri Gate": 750
+            }
+        },
+        "Rohtak": {
+            "risk": "High",
+            "score": 7400,
+            "areas": {
+                "DLF Colony": 800,
+                "Model Town": 900,
+                "Sector 2": 850,
+                "Quilla Road": 1000,
+                "Civil Lines": 700
+            }
+        }
+    },
+    "Himachal Pradesh": {
+        "Shimla": {
+            "risk": "Low",
+            "score": 1800,
+            "areas": {
+                "Mall Road": 300,
+                "Sanjauli": 250,
+                "Chotta Shimla": 200,
+                "New Shimla": 180,
+                "Kasumpti": 220
+            }
+        },
+        "Manali": {
+            "risk": "Low",
+            "score": 1500,
+            "areas": {
+                "Mall Road": 250,
+                "Old Manali": 200,
+                "Vashisht": 150,
+                "Aleo": 180,
+                "Prini": 120
+            }
+        },
+        "Dharamshala": {
+            "risk": "Low",
+            "score": 1600,
+            "areas": {
+                "McLeod Ganj": 200,
+                "Kotwali Bazar": 250,
+                "Sidhbari": 180,
+                "Yol": 150,
+                "Dari": 170
+            }
+        },
+        "Solan": {
+            "risk": "Low",
+            "score": 1700,
+            "areas": {
+                "Mall Road": 220,
+                "Deonghat": 180,
+                "Chambaghat": 150,
+                "Saproon": 190,
+                "Rabon": 160
+            }
+        },
+        "Mandi": {
+            "risk": "Low",
+            "score": 1900,
+            "areas": {
+                "Seri Manch": 200,
+                "Paddington": 180,
+                "Bhiuli": 190,
+                "Khaliyar": 210,
+                "Sauli Khad": 220
+            }
+        }
+    },
+    "Jharkhand": {
+        "Ranchi": {
+            "risk": "Medium",
+            "score": 6200,
+            "areas": {
+                "Lalpur": 800,
+                "Doranda": 700,
+                "Harmu": 600,
+                "Morabadi": 500,
+                "Ratu Road": 900
+            }
+        },
+        "Jamshedpur": {
+            "risk": "Medium",
+            "score": 5800,
+            "areas": {
+                "Bistupur": 600,
+                "Sakchi": 700,
+                "Telco": 500,
+                "Kadma": 650,
+                "Sonari": 550
+            }
+        },
+        "Dhanbad": {
+            "risk": "High",
+            "score": 7500,
+            "areas": {
+                "Bank More": 1000,
+                "Hirapur": 800,
+                "Saraidhela": 900,
+                "Jharia": 1200,
+                "Bartand": 700
+            }
+        },
+        "Bokaro": {
+            "risk": "Medium",
+            "score": 5100,
+            "areas": {
+                "Sector 4": 600,
+                "Chas": 800,
+                "Sector 1": 500,
+                "Co-operative Colony": 450,
+                "Sector 9": 550
+            }
+        },
+        "Hazaribagh": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Matwari": 500,
+                "Pelawal": 450,
+                "Okhni": 400,
+                "Korrah": 550,
+                "Pugmil": 480
+            }
+        }
+    },
+    "Karnataka": {
+        "Bengaluru": {
+            "risk": "Medium",
+            "score": 5500,
+            "areas": {
+                "Indiranagar": 800,
+                "Koramangala": 900,
+                "Whitefield": 1100,
+                "Jayanagar": 500,
+                "Malleswaram": 600
+            }
+        },
+        "Mysuru": {
+            "risk": "Low",
+            "score": 2500,
+            "areas": {
+                "Gokulam": 300,
+                "Jayalakshmipuram": 400,
+                "Saraswathipuram": 500,
+                "Vijayanagar": 600,
+                "Kuvempunagar": 450
+            }
+        },
+        "Hubballi": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Vidyanagar": 700,
+                "Keshwapur": 800,
+                "Old Hubli": 1000,
+                "Navanagar": 600,
+                "Gokul Road": 750
+            }
+        },
+        "Mangaluru": {
+            "risk": "Low",
+            "score": 2800,
+            "areas": {
+                "Kadri": 400,
+                "Bejai": 450,
+                "Hampankatta": 600,
+                "Urwa": 350,
+                "Valencia": 500
+            }
+        },
+        "Belagavi": {
+            "risk": "Low",
+            "score": 3200,
+            "areas": {
+                "Tilakwadi": 500,
+                "Camp": 600,
+                "Shahapur": 700,
+                "Hindwadi": 550,
+                "Vadgaon": 650
+            }
+        }
+    },
+    "Kerala": {
+        "Kochi": {
+            "risk": "High",
+            "score": 16040,
+            "areas": {
+                "Edappally": 1800,
+                "Kaloor": 1500,
+                "Fort Kochi": 1600,
+                "Palarivattom": 1400,
+                "Vyttila": 1700
+            }
+        },
+        "Thiruvananthapuram": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Pattom": 600,
+                "Kowdiar": 500,
+                "Vellayambalam": 550,
+                "Thampanoor": 700,
+                "Kazhakkoottam": 650
+            }
+        },
+        "Kozhikode": {
+            "risk": "Medium",
+            "score": 4100,
+            "areas": {
+                "Mavoor Road": 600,
+                "Mananchira": 500,
+                "Nadakkavu": 450,
+                "Eranhipalam": 400,
+                "Medical College": 550
+            }
+        },
+        "Thrissur": {
+            "risk": "Low",
+            "score": 3200,
+            "areas": {
+                "Swaraj Round": 500,
+                "Ayyanthole": 400,
+                "Patturaikkal": 350,
+                "Ollur": 450,
+                "Punkunnam": 380
+            }
+        },
+        "Kollam": {
+            "risk": "Low",
+            "score": 3500,
+            "areas": {
+                "Chinnakada": 500,
+                "Asramam": 400,
+                "Kadappakada": 450,
+                "Tangasseri": 350,
+                "Polayathode": 420
+            }
+        }
+    },
+    "Madhya Pradesh": {
+        "Indore": {
+            "risk": "High",
+            "score": 11090,
+            "areas": {
+                "Vijay Nagar": 1200,
+                "Palasia": 1000,
+                "Rajwada": 1500,
+                "Bhawarkua": 1100,
+                "Mhow Naka": 900
+            }
+        },
+        "Bhopal": {
+            "risk": "High",
+            "score": 8800,
+            "areas": {
+                "Arera Colony": 800,
+                "MP Nagar": 1100,
+                "New Market": 1000,
+                "Kolar Road": 900,
+                "Bairagarh": 950
+            }
+        },
+        "Gwalior": {
+            "risk": "High",
+            "score": 9200,
+            "areas": {
+                "City Center": 1000,
+                "Lashkar": 1300,
+                "Morar": 1100,
+                "Thatipur": 900,
+                "Hazira": 1200
+            }
+        },
+        "Jabalpur": {
+            "risk": "Medium",
+            "score": 6800,
+            "areas": {
+                "Napier Town": 800,
+                "Wright Town": 700,
+                "Sadar": 900,
+                "Adhartal": 850,
+                "Gorakhpur": 750
+            }
+        },
+        "Ujjain": {
+            "risk": "Medium",
+            "score": 5200,
+            "areas": {
+                "Freeganj": 700,
+                "Mahakal Area": 800,
+                "Nanakheda": 600,
+                "Rishi Nagar": 550,
+                "Agar Road": 650
+            }
+        }
+    },
+    "Maharashtra": {
+        "Mumbai": {
+            "risk": "Low",
+            "score": 3550,
+            "areas": {
+                "Colaba": 500,
+                "Andheri": 1200,
+                "Bandra": 900,
+                "Juhu": 600,
+                "Dadar": 800
+            }
+        },
+        "Pune": {
+            "risk": "Low",
+            "score": 3370,
+            "areas": {
+                "Koregaon Park": 400,
+                "Shivajinagar": 700,
+                "Hinjewadi": 900,
+                "Kothrud": 500,
+                "Viman Nagar": 600
+            }
+        },
+        "Nagpur": {
+            "risk": "High",
+            "score": 8920,
+            "areas": {
+                "Sitabuldi": 1500,
+                "Dharampeth": 1200,
+                "Sadar": 1800,
+                "Mahal": 2000,
+                "Itwari": 2200
+            }
+        },
+        "Thane": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Naupada": 800,
+                "Ghodbunder Road": 1000,
+                "Vartak Nagar": 900,
+                "Kopri": 700,
+                "Majiwada": 950
+            }
+        },
+        "Nashik": {
+            "risk": "Low",
+            "score": 3000,
+            "areas": {
+                "Panchavati": 600,
+                "Gangapur Road": 400,
+                "Satpur": 800,
+                "Indira Nagar": 500,
+                "Nashik Road": 700
+            }
+        }
+    },
+    "Manipur": {
+        "Imphal": {
+            "risk": "High",
+            "score": 8500,
+            "areas": {
+                "Thangal Bazar": 1100,
+                "Paona Bazar": 1200,
+                "Lamphelpat": 900,
+                "Mantripukhri": 800,
+                "Singjamei": 950
+            }
+        },
+        "Churachandpur": {
+            "risk": "Medium",
+            "score": 6000,
+            "areas": {
+                "Tuibong": 700,
+                "New Bazaar": 800,
+                "Old Bazaar": 750,
+                "Zenhang Lamka": 650,
+                "Rengkai": 700
+            }
+        },
+        "Thoubal": {
+            "risk": "Medium",
+            "score": 5200,
+            "areas": {
+                "Thoubal Bazar": 700,
+                "Wangjing": 600,
+                "Yairipok": 650,
+                "Khongjom": 550,
+                "Lilong": 750
+            }
+        },
+        "Kakching": {
+            "risk": "Low",
+            "score": 3500,
+            "areas": {
+                "Kakching Bazar": 400,
+                "Pallel": 350,
+                "Wabagai": 300,
+                "Hiyanglam": 280,
+                "Sora": 320
+            }
+        },
+        "Ukhrul": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Ukhrul Town": 600,
+                "Phungreitang": 550,
+                "Tangrei": 500,
+                "Viewland": 450,
+                "Awontang": 480
+            }
+        }
+    },
+    "Meghalaya": {
+        "Shillong": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Police Bazar": 600,
+                "Laitumkhrah": 500,
+                "Polo": 450,
+                "Laban": 400,
+                "Mawlai": 550
+            }
+        },
+        "Tura": {
+            "risk": "Low",
+            "score": 3000,
+            "areas": {
+                "Hawakhana": 400,
+                "Chandmari": 350,
+                "Araimile": 300,
+                "Dakopgre": 280,
+                "Ringrey": 320
+            }
+        },
+        "Jowai": {
+            "risk": "Low",
+            "score": 2500,
+            "areas": {
+                "Iawmusiang": 350,
+                "Ladthadlaboh": 300,
+                "Khimmusniang": 280,
+                "Panaliar": 250,
+                "Chutwakhu": 270
+            }
+        },
+        "Nongpoh": {
+            "risk": "Low",
+            "score": 1800,
+            "areas": {
+                "Nongpoh Market": 200,
+                "Pahamsyiem": 180,
+                "Umling": 150,
+                "Byrnihat": 220,
+                "Umden": 160
+            }
+        },
+        "Williamnagar": {
+            "risk": "Low",
+            "score": 1600,
+            "areas": {
+                "Williamnagar Market": 180,
+                "Balsrigittim": 150,
+                "Kusimkolgre": 140,
+                "Dengagar": 130,
+                "Songsak": 160
+            }
+        }
+    },
+    "Mizoram": {
+        "Aizawl": {
+            "risk": "Low",
+            "score": 1500,
+            "areas": {
+                "Bara Bazar": 250,
+                "Zarkawt": 200,
+                "Chanmari": 180,
+                "Mission Veng": 150,
+                "Vaivakawn": 170
+            }
+        },
+        "Lunglei": {
+            "risk": "Low",
+            "score": 1200,
+            "areas": {
+                "Venglai": 150,
+                "Farm Veng": 120,
+                "Chanmari": 130,
+                "Electric Veng": 140,
+                "Zotlang": 110
+            }
+        },
+        "Champhai": {
+            "risk": "Low",
+            "score": 1000,
+            "areas": {
+                "Vengthlang": 120,
+                "Vengsang": 110,
+                "Kahrawt": 100,
+                "Bethel": 90,
+                "Electric Veng": 130
+            }
+        },
+        "Kolasib": {
+            "risk": "Low",
+            "score": 900,
+            "areas": {
+                "Diakkawn": 110,
+                "Venglai": 100,
+                "Project Veng": 90,
+                "Saidan": 80,
+                "Hmar Veng": 85
+            }
+        },
+        "Serchhip": {
+            "risk": "Low",
+            "score": 800,
+            "areas": {
+                "New Serchhip": 100,
+                "Chhiahtlang": 90,
+                "Thenzawl": 80,
+                "Bungtlang": 70,
+                "Keitum": 60
+            }
+        }
+    },
+    "Nagaland": {
+        "Kohima": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Razhu Point": 600,
+                "PR Hill": 500,
+                "High School": 450,
+                "Boc": 550,
+                "Lerie": 400
+            }
+        },
+        "Dimapur": {
+            "risk": "High",
+            "score": 7200,
+            "areas": {
+                "Hong Kong Market": 900,
+                "Notun Basti": 800,
+                "Duncan Basti": 750,
+                "Nagarjan": 850,
+                "Chumukedima": 700
+            }
+        },
+        "Mokokchung": {
+            "risk": "Low",
+            "score": 2500,
+            "areas": {
+                "Main Bazar": 300,
+                "Arkong": 250,
+                "Dilong": 200,
+                "Penli": 220,
+                "Sungkomen": 180
+            }
+        },
+        "Tuensang": {
+            "risk": "Low",
+            "score": 2200,
+            "areas": {
+                "Tuensang Town": 250,
+                "St John A": 200,
+                "Hakchang": 180,
+                "Helipong": 150,
+                "Chare": 170
+            }
+        },
+        "Wokha": {
+            "risk": "Low",
+            "score": 2000,
+            "areas": {
+                "Wokha Town": 220,
+                "Vankhosung": 180,
+                "Longsa": 160,
+                "Englan": 140,
+                "Sanis": 150
+            }
+        }
+    },
+    "Odisha": {
+        "Bhubaneswar": {
+            "risk": "Medium",
+            "score": 5200,
+            "areas": {
+                "Saheed Nagar": 700,
+                "Chandrasekharpur": 600,
+                "Patia": 650,
+                "Jayadev Vihar": 550,
+                "Nayapalli": 620
+            }
+        },
+        "Cuttack": {
+            "risk": "Medium",
+            "score": 6000,
+            "areas": {
+                "Badambadi": 800,
+                "Buxi Bazaar": 700,
+                "College Square": 600,
+                "Chauliaganj": 750,
+                "Ranihat": 650
+            }
+        },
+        "Rourkela": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Civil Township": 600,
+                "Sector 19": 500,
+                "Basanti Colony": 450,
+                "Koel Nagar": 550,
+                "Chhend": 480
+            }
+        },
+        "Berhampur": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Bada Bazaar": 600,
+                "Hill Patna": 500,
+                "Kamapalli": 450,
+                "Aska Road": 550,
+                "Gosaninuagam": 400
+            }
+        },
+        "Sambalpur": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Budharaja": 500,
+                "Ainthapali": 450,
+                "Dhanupali": 400,
+                "Khetrajpur": 550,
+                "VSS Marg": 420
+            }
+        }
+    },
+    "Punjab": {
+        "Ludhiana": {
+            "risk": "High",
+            "score": 8500,
+            "areas": {
+                "Civil Lines": 900,
+                "Sarabha Nagar": 800,
+                "Model Town": 1000,
+                "Chaura Bazar": 1100,
+                "Dugri": 850
+            }
+        },
+        "Amritsar": {
+            "risk": "High",
+            "score": 8000,
+            "areas": {
+                "Hall Bazar": 1000,
+                "Ranjit Avenue": 800,
+                "Civil Lines": 700,
+                "Lawrence Road": 900,
+                "Majitha Road": 850
+            }
+        },
+        "Jalandhar": {
+            "risk": "High",
+            "score": 7800,
+            "areas": {
+                "Model Town": 900,
+                "Cantt": 700,
+                "Adarsh Nagar": 800,
+                "Rama Mandi": 850,
+                "Nakodar Road": 750
+            }
+        },
+        "Patiala": {
+            "risk": "Medium",
+            "score": 6500,
+            "areas": {
+                "Leela Bhawan": 700,
+                "Model Town": 650,
+                "Urban Estate": 600,
+                "Tripuri": 750,
+                "Baradari": 550
+            }
+        },
+        "Bathinda": {
+            "risk": "Medium",
+            "score": 6200,
+            "areas": {
+                "Civil Station": 600,
+                "Model Town": 650,
+                "Kamla Nehru Colony": 550,
+                "Bhatti Road": 620,
+                "Ajit Road": 580
+            }
+        }
+    },
+    "Rajasthan": {
+        "Jaipur": {
+            "risk": "High",
+            "score": 10260,
+            "areas": {
+                "C Scheme": 1100,
+                "Malviya Nagar": 900,
+                "Raja Park": 1000,
+                "Vaishali Nagar": 1200,
+                "Mansarovar": 1150
+            }
+        },
+        "Jodhpur": {
+            "risk": "Medium",
+            "score": 6800,
+            "areas": {
+                "Sardarpura": 800,
+                "Ratanada": 700,
+                "Shastri Nagar": 750,
+                "Paota": 650,
+                "Mandore": 600
+            }
+        },
+        "Kota": {
+            "risk": "Medium",
+            "score": 6500,
+            "areas": {
+                "Talwandi": 700,
+                "Dadabari": 650,
+                "Vigyan Nagar": 750,
+                "Station Area": 800,
+                "Kunhari": 600
+            }
+        },
+        "Udaipur": {
+            "risk": "Low",
+            "score": 3800,
+            "areas": {
+                "Hiran Magri": 500,
+                "Fatehpura": 400,
+                "Ashok Nagar": 450,
+                "Sector 14": 420,
+                "Sukher": 480
+            }
+        },
+        "Ajmer": {
+            "risk": "Medium",
+            "score": 5200,
+            "areas": {
+                "Vaishali Nagar": 600,
+                "Civil Lines": 500,
+                "Adarsh Nagar": 550,
+                "Makhupura": 450,
+                "Pushkar Road": 520
+            }
+        }
+    },
+    "Sikkim": {
+        "Gangtok": {
+            "risk": "Low",
+            "score": 1200,
+            "areas": {
+                "MG Marg": 200,
+                "Deorali": 150,
+                "Tadong": 180,
+                "Sichey": 140,
+                "Burtuk": 120
+            }
+        },
+        "Namchi": {
+            "risk": "Low",
+            "score": 1000,
+            "areas": {
+                "Central Park": 120,
+                "Boomtar": 100,
+                "Kopchey": 90,
+                "Jorethang Road": 110,
+                "Singithang": 80
+            }
+        },
+        "Geyzing": {
+            "risk": "Low",
+            "score": 900,
+            "areas": {
+                "Geyzing Bazaar": 100,
+                "Kyongsa": 90,
+                "Pelling Road": 80,
+                "Legship": 70,
+                "Tashiding": 60
+            }
+        },
+        "Mangan": {
+            "risk": "Low",
+            "score": 800,
+            "areas": {
+                "Mangan Bazaar": 100,
+                "Pentok": 80,
+                "Singhik": 70,
+                "Ringhim": 60,
+                "Chungthang": 90
+            }
+        },
+        "Rangpo": {
+            "risk": "Low",
+            "score": 950,
+            "areas": {
+                "Rangpo Bazar": 120,
+                "IBM": 100,
+                "Majhitar": 110,
+                "Mining": 90,
+                "Bhasmey": 80
+            }
+        }
+    },
+    "Tamil Nadu": {
+        "Chennai": {
+            "risk": "High",
+            "score": 13250,
+            "areas": {
+                "T. Nagar": 1500,
+                "Adyar": 800,
+                "Anna Nagar": 1000,
+                "Mylapore": 700,
+                "Velachery": 1200
+            }
+        },
+        "Coimbatore": {
+            "risk": "Low",
+            "score": 2000,
+            "areas": {
+                "RS Puram": 300,
+                "Gandhipuram": 500,
+                "Peelamedu": 400,
+                "Saibaba Colony": 350,
+                "Race Course": 250
+            }
+        },
+        "Madurai": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Anna Nagar": 800,
+                "KK Nagar": 700,
+                "Simmakkal": 1000,
+                "Periyar": 1100,
+                "Mattuthavani": 900
+            }
+        },
+        "Tiruchirappalli": {
+            "risk": "Low",
+            "score": 2900,
+            "areas": {
+                "Thillai Nagar": 400,
+                "Srirangam": 300,
+                "Cantonment": 500,
+                "KK Nagar": 600,
+                "Woraiyur": 700
+            }
+        },
+        "Salem": {
+            "risk": "Medium",
+            "score": 4100,
+            "areas": {
+                "Fairlands": 600,
+                "Hasthampatti": 700,
+                "Suramangalam": 900,
+                "Ammapet": 800,
+                "Shevapet": 1000
+            }
+        }
+    },
+    "Telangana": {
+        "Hyderabad": {
+            "risk": "Low",
+            "score": 3323,
+            "areas": {
+                "Banjara Hills": 400,
+                "Jubilee Hills": 350,
+                "Gachibowli": 300,
+                "Hitech City": 250,
+                "Kukatpally": 450
+            }
+        },
+        "Warangal": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Hanamkonda": 600,
+                "Kazipet": 550,
+                "Subedari": 500,
+                "Mattewada": 520,
+                "Nakkalagutta": 480
+            }
+        },
+        "Nizamabad": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Khaleelwadi": 500,
+                "Vinayak Nagar": 450,
+                "Dubba": 400,
+                "Kamareddy Road": 480,
+                "Namdevwada": 420
+            }
+        },
+        "Karimnagar": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Mankammathota": 500,
+                "Mukarampura": 450,
+                "Geetha Nagar": 400,
+                "Kaman": 480,
+                "Vavilalapally": 420
+            }
+        },
+        "Khammam": {
+            "risk": "Medium",
+            "score": 4000,
+            "areas": {
+                "Wyra Road": 450,
+                "Mamatha Hospital Road": 400,
+                "Gandhi Chowk": 480,
+                "Bank Colony": 380,
+                "Rotary Nagar": 420
+            }
+        }
+    },
+    "Tripura": {
+        "Agartala": {
+            "risk": "Low",
+            "score": 2200,
+            "areas": {
+                "Krishnanagar": 300,
+                "Indranagar": 250,
+                "Ramnagar": 200,
+                "Battala": 280,
+                "Dhaleswar": 220
+            }
+        },
+        "Dharmanagar": {
+            "risk": "Low",
+            "score": 1800,
+            "areas": {
+                "College Road": 200,
+                "Nayapara": 180,
+                "Rajbari": 150,
+                "Sakaibari": 170,
+                "Chandrapur": 160
+            }
+        },
+        "Udaipur": {
+            "risk": "Low",
+            "score": 1600,
+            "areas": {
+                "Jamjuri": 180,
+                "Matabari": 160,
+                "Rajarbag": 190,
+                "Khowai Road": 150,
+                "Brahmabari": 140
+            }
+        },
+        "Kailashahar": {
+            "risk": "Low",
+            "score": 1500,
+            "areas": {
+                "Paiturbazar": 150,
+                "Boulapasa": 120,
+                "Gournagar": 140,
+                "Vidyapith": 130,
+                "Kubjar": 110
+            }
+        },
+        "Belonia": {
+            "risk": "Low",
+            "score": 1400,
+            "areas": {
+                "College Square": 150,
+                "Arya Colony": 120,
+                "Subhash Nagar": 140,
+                "Bankar": 110,
+                "Sarasima": 100
+            }
+        }
+    },
+    "Uttar Pradesh": {
+        "Lucknow": {
+            "risk": "Medium",
+            "score": 6000,
+            "areas": {
+                "Hazratganj": 800,
+                "Gomti Nagar": 600,
+                "Aliganj": 900,
+                "Indira Nagar": 1000,
+                "Chowk": 1200
+            }
+        },
+        "Kanpur": {
+            "risk": "High",
+            "score": 7500,
+            "areas": {
+                "Swaroop Nagar": 900,
+                "Civil Lines": 800,
+                "Kakadeo": 1500,
+                "Kidwai Nagar": 1300,
+                "Govind Nagar": 1400
+            }
+        },
+        "Ghaziabad": {
+            "risk": "High",
+            "score": 9000,
+            "areas": {
+                "Indirapuram": 1200,
+                "Vaishali": 1100,
+                "Kaushambi": 1000,
+                "Raj Nagar": 1500,
+                "Kavi Nagar": 1400
+            }
+        },
+        "Agra": {
+            "risk": "Medium",
+            "score": 6500,
+            "areas": {
+                "Tajganj": 1000,
+                "Sadar": 800,
+                "Sikandra": 1200,
+                "Kamla Nagar": 900,
+                "Dayalbagh": 700
+            }
+        },
+        "Varanasi": {
+            "risk": "Medium",
+            "score": 5800,
+            "areas": {
+                "Lanka": 1000,
+                "Cantonment": 800,
+                "Godowlia": 1200,
+                "Sigra": 900,
+                "Bhelupur": 1100
+            }
+        }
+    },
+    "Uttarakhand": {
+        "Dehradun": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Rajpur Road": 600,
+                "Vasant Vihar": 500,
+                "Dalanwala": 550,
+                "Clement Town": 450,
+                "Clock Tower": 650
+            }
+        },
+        "Haridwar": {
+            "risk": "Low",
+            "score": 3800,
+            "areas": {
+                "Har Ki Pauri": 400,
+                "Kankhal": 350,
+                "Ranipur": 450,
+                "Jawalsapur": 300,
+                "Shivalik Nagar": 380
+            }
+        },
+        "Rishikesh": {
+            "risk": "Low",
+            "score": 3200,
+            "areas": {
+                "Tapovan": 300,
+                "Laxman Jhula": 250,
+                "Muni Ki Reti": 280,
+                "Triveni Ghat": 350,
+                "IDPL Colony": 320
+            }
+        },
+        "Haldwani": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Mukhani": 500,
+                "Kathgodam": 450,
+                "Kaladhungi Road": 550,
+                "Pilikothi": 480,
+                "Heera Nagar": 520
+            }
+        },
+        "Roorkee": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "Civil Lines": 500,
+                "IIT Campus": 300,
+                "Ganeshpur": 450,
+                "Ramnagar": 400,
+                "Salempur": 350
+            }
+        }
+    },
+    "West Bengal": {
+        "Kolkata": {
+            "risk": "Low",
+            "score": 839,
+            "areas": {
+                "Park Street": 150,
+                "Salt Lake": 100,
+                "Ballygunge": 120,
+                "New Town": 180,
+                "Alipore": 80
+            }
+        },
+        "Howrah": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Shibpur": 600,
+                "Salkia": 550,
+                "Liluah": 500,
+                "Belur": 480,
+                "Santragachi": 520
+            }
+        },
+        "Durgapur": {
+            "risk": "Medium",
+            "score": 4200,
+            "areas": {
+                "City Center": 500,
+                "Benachity": 600,
+                "Bidhannagar": 450,
+                "Muchipara": 550,
+                "Sagarbhanga": 480
+            }
+        },
+        "Asansol": {
+            "risk": "Medium",
+            "score": 4800,
+            "areas": {
+                "Burnpur": 600,
+                "Hutton Road": 550,
+                "Kalyanpur": 500,
+                "Raniganj": 650,
+                "Ukhra": 520
+            }
+        },
+        "Siliguri": {
+            "risk": "Medium",
+            "score": 4500,
+            "areas": {
+                "Sevoke Road": 600,
+                "Hill Cart Road": 550,
+                "Pradhan Nagar": 500,
+                "Hakim Para": 480,
+                "Deshbandhu Para": 520
+            }
+        }
+    },
+    "Delhi": {
+        "New Delhi": {
+            "risk": "High",
+            "score": 18320,
+            "areas": {
+                "Connaught Place": 2000,
+                "Chanakyapuri": 1500,
+                "Lajpat Nagar": 1800,
+                "Vasant Kunj": 1700,
+                "Karol Bagh": 2200
+            }
+        }
+    }
+}
