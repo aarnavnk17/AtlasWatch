@@ -6,17 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Top-level callback for geofence events.
 /// Must be persistent and not stripped by ProGuard (on Android).
 @pragma('vm:entry-point')
-void geofenceCallback(List<String> ids, GeofenceTransition transition) {
-  debugPrint('Geofence Transition Occurred!');
-  debugPrint('IDs: $ids');
-  debugPrint('Transition: $transition');
+Future<void> geofenceCallback(GeofenceCallbackParams params) async {
+  debugPrint('Geofence Event Occurred!');
+  debugPrint('IDs: ${params.geofences.map((g) => g.id).toList()}');
+  debugPrint('Event: ${params.event}');
 
   // Logic for what happens when entering/exiting
-  for (var id in ids) {
-    if (transition == GeofenceTransition.enter) {
+  for (var geofence in params.geofences) {
+    final id = geofence.id;
+    if (params.event == GeofenceEvent.enter) {
       debugPrint('Entering geofence: $id');
       // Potential Action: Notify backend or send "I'm Safe"
-    } else if (transition == GeofenceTransition.exit) {
+    } else if (params.event == GeofenceEvent.exit) {
       debugPrint('Exiting geofence: $id');
       // Potential Action: Trigger SOS countdown or alert contacts
     }
@@ -50,13 +51,16 @@ class GeofenceService {
     final Geofence region = Geofence(
       id: id,
       location: Location(latitude: latitude, longitude: longitude),
-      radius: radiusInMeters,
-      triggers: {GeofenceTransition.enter, GeofenceTransition.exit},
-      iosSettings: const IOSGeofenceSettings(initialTrigger: true),
+      radiusMeters: radiusInMeters,
+      triggers: {GeofenceEvent.enter, GeofenceEvent.exit},
+      androidSettings: const AndroidGeofenceSettings(
+        initialTriggers: {GeofenceEvent.enter},
+      ),
+      iosSettings: const IosGeofenceSettings(initialTrigger: true),
     );
 
     try {
-      await NativeGeofenceManager.instance.registerGeofence(
+      await NativeGeofenceManager.instance.createGeofence(
         region,
         geofenceCallback,
       );
@@ -84,7 +88,7 @@ class GeofenceService {
   /// Remove a geofence region and delete from persistence
   Future<void> removeZone(String id) async {
     try {
-      await NativeGeofenceManager.instance.unregisterGeofence(id);
+      await NativeGeofenceManager.instance.removeGeofenceById(id);
       
       final prefs = await SharedPreferences.getInstance();
       final List<String> zones = prefs.getStringList(_kGeofenceKey) ?? [];
