@@ -153,4 +153,37 @@ class SessionService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_profileCompleteKey, value);
   }
+
+  // ================================
+  // OTP (One-time password)
+  // ================================
+  Future<bool> sendOtp(String email) async {
+    try {
+      final response = await BackendService.post(
+        '/send-otp',
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('sendOtp failed: $e');
+      return false;
+    }
+  }
+
+  Future<bool> verifyOtp(String email, String code) async {
+    try {
+      final response = await BackendService.post(
+        '/verify-otp',
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email, 'code': code}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('verifyOtp failed: $e');
+      return false;
+    }
+  }
 }
