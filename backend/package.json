@@ -15,6 +15,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "nodemailer": "^6.9.5",
+    "@sendgrid/mail": "^7.9.0",
     "sqlite3": "^5.1.7"
   }
 }
