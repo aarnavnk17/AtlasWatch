@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/session_service.dart';
-import 'otp_verification_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -33,7 +31,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final auth = AuthService();
-      final error = await auth.register(email: email, password: password);
+      final error = await auth.register(
+        email: email,
+        password: password,
+      );
 
       if (!mounted) return;
 
@@ -42,18 +43,10 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       if (error == null) {
-        // send OTP and navigate to verification
-        final session = SessionService();
-        await session.sendOtp(email);
-
-        if (!mounted) return;
-
-        Navigator.pushReplacement(
+        ScaffoldMessenger.of(
           context,
-          MaterialPageRoute(
-            builder: (_) => OtpVerificationScreen(email: email),
-          ),
-        );
+        ).showSnackBar(const SnackBar(content: Text('Signup successful')));
+        Navigator.pop(context); // Return to login screen
       } else {
         ScaffoldMessenger.of(
           context,

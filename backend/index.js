@@ -8,36 +8,6 @@ app.use(express.json());
 
 const db = new sqlite3.Database('./atlaswatch.db');
 const crimeData = require('./data/crime_data.json');
-const nodemailer = require('nodemailer');
-
-// Simple email transporter; configure via environment variables in production
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'localhost',
-  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 1025,
-  secure: false,
-  auth: process.env.SMTP_USER ? {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  } : undefined,
-});
-
-async function sendOtpEmail(email, code) {
-  try {
-    if (!transporter) throw new Error('No transporter');
-    const info = await transporter.sendMail({
-      from: process.env.OTP_FROM || 'no-reply@atlaswatch.local',
-      to: email,
-      subject: 'Your AtlasWatch verification code',
-      text: `Your verification code is ${code}`,
-    });
-    console.log('OTP email sent via SMTP:', info.messageId || info);
-    return true;
-  } catch (e) {
-    console.warn('Failed to send OTP email via SMTP, falling back to console:', e.message || e);
-    console.log(`OTP for ${email}: ${code}`);
-    return false;
-  }
-}
 
 // ============================
 // CRIME STATS ENDPOINT
@@ -173,68 +143,6 @@ db.serialize(() => {
       FOREIGN KEY(user_email) REFERENCES users(email)
     )
   `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS otps (
-      email TEXT NOT NULL,
-      code TEXT NOT NULL,
-      expires_at INTEGER NOT NULL
-    )
-  `);
-});
-
-// ============================
-// OTP (One-time password) endpoints
-// ============================
-app.post('/send-otp', (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
-
-  // Generate 6-digit numeric code
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = Date.now() + (5 * 60 * 1000); // 5 minutes
-
-  db.run(
-    `INSERT INTO otps (email, code, expires_at) VALUES (?, ?, ?)`,
-    [email, code, expiresAt],
-    function (err) {
-      if (err) {
-        console.error('OTP save error:', err.message);
-        return res.status(500).json({ success: false, message: 'Database error' });
-      }
-
-      // For demo purposes we print the OTP to console. In production integrate SMS/email provider.
-      console.log(`OTP for ${email}: ${code} (expires in 5 minutes)`);
-      res.json({ success: true });
-    }
-  );
-});
-
-app.post('/verify-otp', (req, res) => {
-  const { email, code } = req.body;
-  if (!email || !code) return res.status(400).json({ success: false, message: 'Missing fields' });
-
-  const now = Date.now();
-  db.get(
-    `SELECT * FROM otps WHERE email = ? AND code = ? AND expires_at > ? ORDER BY expires_at DESC LIMIT 1`,
-    [email, code, now],
-    (err, row) => {
-      if (err) {
-        console.error('OTP verify error:', err.message);
-        return res.status(500).json({ success: false, message: 'Database error' });
-      }
-
-      if (!row) {
-        return res.status(400).json({ success: false, message: 'Invalid or expired code' });
-      }
-
-      // Clean up OTPs for this email
-      db.run(`DELETE FROM otps WHERE email = ?`, [email]);
-
-      // Optionally, mark user verified in users table (not implemented here)
-      res.json({ success: true });
-    }
-  );
 });
 
 // ============================
@@ -304,31 +212,8 @@ app.post('/login', (req, res) => {
       }
 
       if (row) {
-            // Generate OTP and email it for verification on every login
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            const expiresAt = Date.now() + (5 * 60 * 1000);
-
-            db.run(
-              `INSERT INTO otps (email, code, expires_at) VALUES (?, ?, ?)`,
-              [row.email, code, expiresAt],
-              function (err) {
-                if (err) {
-                  console.error('OTP save error on login:', err.message);
-                  // fallback to not blocking login
-                  console.log(`User logged in (no OTP saved): ${row.email}`);
-                  return res.json({ success: true, email: row.email });
-                }
-
-                // attempt to send email (will log to console if SMTP not configured)
-                sendOtpEmail(row.email, code).then(() => {
-                  console.log(`User login OTP sent: ${row.email}`);
-                  res.json({ success: true, email: row.email, otpSent: true });
-                }).catch((e) => {
-                  console.warn('Failed to send login OTP:', e.message || e);
-                  res.json({ success: true, email: row.email, otpSent: false });
-                });
-              }
-            );
+        console.log(`User logged in: ${row.email}`);
+        res.json({ success: true, email: row.email });
       } else {
         res.status(401).json({
           success: false,

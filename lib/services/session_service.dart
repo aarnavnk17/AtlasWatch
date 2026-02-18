@@ -11,10 +11,7 @@ class SessionService {
   // ================================
   // LOGIN
   // ================================
-  /// Attempts login. Returns a map with keys:
-  /// - 'status': 'otp' (OTP sent), 'ok' (no OTP), 'error'
-  /// - 'email': email when available
-  Future<Map<String, dynamic>> login(String identifier, String password) async {
+  Future<bool> login(String identifier, String password) async {
     try {
       final response = await BackendService.post(
         '/login',
@@ -23,23 +20,18 @@ class SessionService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final email = data['email'] as String?;
+        final data = json.decode(response.body);
+        final email = data['email'];
         if (email != null) {
           await saveEmail(email);
-          if (data['otpSent'] == true) {
-            return {'status': 'otp', 'email': email};
-          }
-          return {'status': 'ok', 'email': email};
+          return true;
         }
-      } else if (response.statusCode == 401) {
-        return {'status': 'error', 'message': 'Invalid credentials'};
       }
     } catch (e) {
       debugPrint('Login failed: $e');
     }
 
-    return {'status': 'error', 'message': 'Login failed'};
+    return false;
   }
 
   Future<void> saveEmail(String email) async {
@@ -160,38 +152,5 @@ class SessionService {
   Future<void> setProfileComplete(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_profileCompleteKey, value);
-  }
-
-  // ================================
-  // OTP (One-time password)
-  // ================================
-  Future<bool> sendOtp(String email) async {
-    try {
-      final response = await BackendService.post(
-        '/send-otp',
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email}),
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('sendOtp failed: $e');
-      return false;
-    }
-  }
-
-  Future<bool> verifyOtp(String email, String code) async {
-    try {
-      final response = await BackendService.post(
-        '/verify-otp',
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'code': code}),
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      debugPrint('verifyOtp failed: $e');
-      return false;
-    }
   }
 }
