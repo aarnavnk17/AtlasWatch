@@ -12,21 +12,23 @@ class SessionService {
   // LOGIN
   // ================================
   Future<bool> login(String identifier, String password) async {
-    final uri = Uri.parse('${BackendService.baseUrl}/login');
+    try {
+      final response = await BackendService.post(
+        '/login',
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': identifier, 'password': password}),
+      );
 
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'identifier': identifier, 'password': password}),
-    ).timeout(const Duration(seconds: 10));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final email = data['email'];
-      if (email != null) {
-        await saveEmail(email);
-        return true;
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final email = data['email'];
+        if (email != null) {
+          await saveEmail(email);
+          return true;
+        }
       }
+    } catch (e) {
+      debugPrint('Login failed: $e');
     }
 
     return false;
@@ -60,25 +62,26 @@ class SessionService {
     final email = await getEmail();
     if (email == null) return false;
 
-    final uri = Uri.parse('${BackendService.baseUrl}/profile?email=$email');
+    try {
+      final response = await BackendService.get('/profile?email=$email');
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        return false;
+      }
 
-    if (response.statusCode != 200) {
-      return false;
+      final data = json.decode(response.body);
+
+      // FIX: check for profile object instead of "exists"
+      if (data['profile'] != null) {
+        return true;
+      }
+
+      if (data['exists'] == true) {
+        return true;
+      }
+    } catch (e) {
+      debugPrint('isProfileComplete check failed: $e');
     }
-
-    final data = json.decode(response.body);
-
-    // FIX: check for profile object instead of "exists"
-    if (data['profile'] != null) {
-      return true;
-    }
-
-    if (data['exists'] == true) {
-      return true;
-    }
-
     return false;
   }
 
@@ -89,20 +92,22 @@ class SessionService {
     final email = await getEmail();
     if (email == null) return null;
 
-    final uri = Uri.parse('${BackendService.baseUrl}/profile?email=$email');
+    try {
+      final response = await BackendService.get('/profile?email=$email');
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return null;
 
-    if (response.statusCode != 200) return null;
+      final data = json.decode(response.body);
 
-    final data = json.decode(response.body);
+      if (data['profile'] != null) {
+        return data['profile'];
+      }
 
-    if (data['profile'] != null) {
-      return data['profile'];
-    }
-
-    if (data['exists'] == true && data['profile'] != null) {
-      return data['profile'];
+      if (data['exists'] == true && data['profile'] != null) {
+        return data['profile'];
+      }
+    } catch (e) {
+      debugPrint('loadProfile failed: $e');
     }
 
     return null;
@@ -119,23 +124,26 @@ class SessionService {
     final email = await getEmail();
     if (email == null) return false;
 
-    final uri = Uri.parse('${BackendService.baseUrl}/profile');
+    try {
+      final response = await BackendService.post(
+        '/profile',
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'passport': passport,
+          'documentType': documentType,
+          'nationality': nationality,
+        }),
+      );
 
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'email': email,
-        'passport': passport,
-        'documentType': documentType,
-        'nationality': nationality,
-      }),
-    ).timeout(const Duration(seconds: 10));
+      debugPrint("PROFILE STATUS: ${response.statusCode}");
+      debugPrint("PROFILE RESPONSE: ${response.body}");
 
-    debugPrint("PROFILE STATUS: ${response.statusCode}");
-    debugPrint("PROFILE RESPONSE: ${response.body}");
-
-    return response.statusCode == 200;
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('saveProfile failed: $e');
+      return false;
+    }
   }
 
   // ================================

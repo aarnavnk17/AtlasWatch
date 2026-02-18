@@ -6,14 +6,14 @@ class ProfileService {
 
   /// Save mandatory document details
   Future<void> saveProfile({
-    required String passportId,
+    required String passport,
     required String documentType,
     required String nationality,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
     final data = {
-      'passportId': passportId,
+      'passport': passport,
       'documentType': documentType,
       'nationality': nationality,
     };
@@ -31,7 +31,7 @@ class ProfileService {
     final decoded = jsonDecode(raw) as Map<String, dynamic>;
 
     return {
-      'passportId': decoded['passportId'] ?? '',
+      'passport': decoded['passport'] ?? '',
       'documentType': decoded['documentType'] ?? '',
       'nationality': decoded['nationality'] ?? '',
     };
