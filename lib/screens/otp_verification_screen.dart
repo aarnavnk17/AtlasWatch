@@ -17,35 +17,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   bool _loading = false;
 
   Future<void> _verify() async {
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Enter the code')));
-      return;
-    }
-
-    setState(() => _loading = true);
-    final ok = await _session.verifyOtp(widget.email, code);
-    setState(() => _loading = false);
-
+    // OTP verification was removed from the backend flow.
+    // For now, proceed directly to profile setup to keep the app usable.
     if (!mounted) return;
-
-    if (ok) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Verified successfully')));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ProfileSetupScreen(isEditMode: false),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Invalid or expired code')));
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ProfileSetupScreen(isEditMode: false),
+      ),
+    );
   }
 
   @override
