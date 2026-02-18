@@ -67,8 +67,8 @@ class BackendService {
 
     for (final candidate in _candidates) {
       try {
-        final uri = Uri.parse(candidate + '/');
-        final resp = await http.get(uri).timeout(_httpTimeout);
+        final uri = Uri.parse('$candidate/');
+        await http.get(uri).timeout(_httpTimeout);
         // Got a response (even 404) — connection succeeded.
         _workingBaseUrl = candidate;
         return _workingBaseUrl!;

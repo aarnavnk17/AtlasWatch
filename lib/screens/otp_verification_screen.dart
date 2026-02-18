@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/session_service.dart';
+// Session-based OTP verification was removed; keep screen minimal for now.
 import 'profile_setup_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -13,8 +13,7 @@ class OtpVerificationScreen extends StatefulWidget {
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _codeController = TextEditingController();
-  final SessionService _session = SessionService();
-  bool _loading = false;
+  final bool _loading = false;
 
   Future<void> _verify() async {
     // OTP verification was removed from the backend flow.
