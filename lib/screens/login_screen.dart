@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/session_service.dart';
+import 'otp_verification_screen.dart';
 import 'dashboard_screen.dart';
 import 'signup_screen.dart';
 import 'profile_setup_screen.dart';
@@ -24,21 +25,36 @@ class _LoginScreenState extends State<LoginScreen> {
     final session = SessionService();
 
     try {
-      final success = await session.login(
+      final result = await session.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
       if (!mounted) return;
 
-      if (!success) {
+      if (result['status'] == 'error') {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Invalid credentials')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Invalid credentials')),
+        );
         return;
       }
 
+      if (result['status'] == 'otp') {
+        // OTP sent — navigate to verification
+        final email =
+            result['email'] as String? ?? _emailController.text.trim();
+        setState(() => _loading = false);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OtpVerificationScreen(email: email),
+          ),
+        );
+        return;
+      }
+
+      // status == 'ok'
       final profileComplete = await session.isProfileComplete();
 
       if (!mounted) return;

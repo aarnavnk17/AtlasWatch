@@ -11,7 +11,10 @@ class SessionService {
   // ================================
   // LOGIN
   // ================================
-  Future<bool> login(String identifier, String password) async {
+  /// Attempts login. Returns a map with keys:
+  /// - 'status': 'otp' (OTP sent), 'ok' (no OTP), 'error'
+  /// - 'email': email when available
+  Future<Map<String, dynamic>> login(String identifier, String password) async {
     try {
       final response = await BackendService.post(
         '/login',
@@ -20,18 +23,23 @@ class SessionService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final email = data['email'];
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final email = data['email'] as String?;
         if (email != null) {
           await saveEmail(email);
-          return true;
+          if (data['otpSent'] == true) {
+            return {'status': 'otp', 'email': email};
+          }
+          return {'status': 'ok', 'email': email};
         }
+      } else if (response.statusCode == 401) {
+        return {'status': 'error', 'message': 'Invalid credentials'};
       }
     } catch (e) {
       debugPrint('Login failed: $e');
     }
 
-    return false;
+    return {'status': 'error', 'message': 'Login failed'};
   }
 
   Future<void> saveEmail(String email) async {
