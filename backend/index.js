@@ -9,19 +9,6 @@ app.use(express.json());
 const db = new sqlite3.Database('./atlaswatch.db');
 const crimeData = require('./data/crime_data.json');
 const nodemailer = require('nodemailer');
-let sendgrid;
-try {
-  // optional: use SendGrid API if available
-  sendgrid = require('@sendgrid/mail');
-  if (process.env.SENDGRID_API_KEY) {
-    sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
-  } else {
-    // not configured yet
-    sendgrid = null;
-  }
-} catch (e) {
-  sendgrid = null;
-}
 
 // Simple email transporter; configure via environment variables in production
 const transporter = nodemailer.createTransport({
@@ -35,24 +22,6 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendOtpEmail(email, code) {
-  // Prefer SendGrid API if configured
-  if (sendgrid) {
-    try {
-      const msg = {
-        to: email,
-        from: process.env.OTP_FROM || 'no-reply@atlaswatch.local',
-        subject: 'Your AtlasWatch verification code',
-        text: `Your verification code is ${code}`,
-      };
-      const resp = await sendgrid.send(msg);
-      console.log('OTP email sent via SendGrid:', resp && resp[0] && resp[0].statusCode);
-      return true;
-    } catch (e) {
-      console.warn('SendGrid send failed, falling back to SMTP/console:', e.message || e);
-      // fall through to SMTP method
-    }
-  }
-
   try {
     if (!transporter) throw new Error('No transporter');
     const info = await transporter.sendMail({
