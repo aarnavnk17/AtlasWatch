@@ -1,5 +1,7 @@
 Backend - MongoDB migration & run
 
+You can place your connection string in `backend/.env` (this repo now includes a local `.env` file for convenience). Be sure to rotate credentials after testing.
+
 1) Install dependencies
 
 ```bash
