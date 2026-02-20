@@ -170,8 +170,7 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    const hashed = bcrypt.hashSync(password, 10);
-    const user = new User({ email, password: hashed });
+    const user = new User({ email, password });
     await user.save();
     console.log(`User registered: ${email}`);
     return res.json({ success: true });
@@ -197,7 +196,7 @@ app.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
-    if (user && bcrypt.compareSync(password, user.password)) {
+    if (user && user.password === password) {
       console.log(`User logged in: ${user.email}`);
       return res.json({ success: true, email: user.email });
     }
