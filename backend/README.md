@@ -1,3 +1,47 @@
+Backend - MongoDB migration & run
+
+1) Install dependencies
+
+```bash
+cd backend
+npm install
+```
+
+2) Set `MONGODB_URI` (example using your provided cluster)
+
+```bash
+export MONGODB_URI="mongodb+srv://aarnavnk17:Atlas123@atlaswatch.ykagnef.mongodb.net/atlaswatch?retryWrites=true&w=majority"
+# (macOS / Linux)
+```
+
+3) Run migration (reads `./atlaswatch.db` and writes to MongoDB)
+
+```bash
+npm run migrate-to-mongo
+```
+
+4) Start backend (uses `PORT` env var if provided)
+
+```bash
+npm start
+```
+
+5) Verify migrated data (using `mongosh` or Compass)
+
+```js
+use atlaswatch
+db.users.count()
+db.profiles.count()
+db.contacts.find().limit(5)
+```
+
+Security notes
+- You provided a connection string directly; for production rotate credentials and store secrets in the provider's secret manager (Render/Heroku/Cloud Run secrets, or environment variables in CI).
+- For Atlas, configure a restricted DB user and limit IP access appropriately.
+
+If you want, I can:
+- Update endpoints in `index.js` to use Mongoose models so the backend no longer depends on `sqlite3`.
+- Add a Dockerfile or Render/Fly/Cloud Run deployment configs.
 Backend email configuration
 ===========================
 

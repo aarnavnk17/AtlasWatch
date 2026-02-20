@@ -1,13 +1,55 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const db = new sqlite3.Database('./atlaswatch.db');
 const crimeData = require('./data/crime_data.json');
+
+// MongoDB connection
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/atlaswatch';
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Mongoose models
+const userSchema = new mongoose.Schema({
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true },
+  profile_completed: { type: Boolean, default: false }
+}, { timestamps: true });
+
+const profileSchema = new mongoose.Schema({
+  email: { type: String, required: true, index: true },
+  passport: { type: String, unique: false },
+  documentType: String,
+  nationality: String
+}, { timestamps: true });
+
+const contactSchema = new mongoose.Schema({
+  user_email: { type: String, required: true, index: true },
+  name: String,
+  phone: String,
+  relationship: String,
+  legacy_id: Number
+}, { timestamps: true });
+
+const User = mongoose.model('User', userSchema);
+const Profile = mongoose.model('Profile', profileSchema);
+const Contact = mongoose.model('Contact', contactSchema);
+
+const locationSchema = new mongoose.Schema({
+  email: { type: String, required: true, index: true },
+  lat: { type: Number, required: true },
+  lng: { type: Number, required: true },
+  accuracy: Number,
+  timestamp: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const Location = mongoose.model('Location', locationSchema);
 
 // ============================
 // CRIME STATS ENDPOINT
@@ -115,226 +157,182 @@ app.get('/crime-stats', (req, res) => {
 // ============================
 // CREATE TABLES
 // ============================
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      email TEXT PRIMARY KEY,
-      password TEXT NOT NULL
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS profiles (
-      email TEXT PRIMARY KEY,
-      passport TEXT UNIQUE,
-      documentType TEXT,
-      nationality TEXT,
-      FOREIGN KEY(email) REFERENCES users(email)
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS contacts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_email TEXT NOT NULL,
-      name TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      relationship TEXT,
-      FOREIGN KEY(user_email) REFERENCES users(email)
-    )
-  `);
-});
+// No SQL table creation needed; Mongoose will manage collections.
 
 // ============================
 // REGISTER
 // ============================
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
-      error: 'Email and password are required'
-    });
+    return res.status(400).json({ success: false, message: 'Email and password are required', error: 'Email and password are required' });
   }
 
-  db.run(
-    `INSERT INTO users (email, password) VALUES (?, ?)`,
-    [email, password],
-    function (err) {
-      if (err) {
-        console.error('Registration error:', err.message);
-        let msg = 'Registration failed';
-        if (err.message.includes('UNIQUE constraint failed: users.email')) {
-          msg = 'Email already registered';
-        } else if (err.message.includes('UNIQUE constraint failed: users.username')) {
-          msg = 'Username already taken';
-        }
-        return res.status(400).json({
-          success: false,
-          message: msg,
-          error: msg
-        });
-      }
-
-      console.log(`User registered: ${email}`);
-      res.json({ success: true });
+  try {
+    const hashed = bcrypt.hashSync(password, 10);
+    const user = new User({ email, password: hashed });
+    await user.save();
+    console.log(`User registered: ${email}`);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Registration error:', err.message);
+    let msg = 'Registration failed';
+    if (err.code === 11000) {
+      msg = 'Email already registered';
     }
-  );
+    return res.status(400).json({ success: false, message: msg, error: msg });
+  }
 });
 
 // ============================
 // LOGIN (Supports Email or Username)
 // ============================
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body; // email is required
 
   if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
-      error: 'Email and password are required'
-    });
+    return res.status(400).json({ success: false, message: 'Email and password are required', error: 'Email and password are required' });
   }
 
-  db.get(
-    `SELECT * FROM users WHERE email = ? AND password = ?`,
-    [email, password],
-    (err, row) => {
-      if (err) {
-        console.error('Login database error:', err.message);
-        return res.status(500).json({
-          success: false,
-          message: 'Internal server error',
-          error: 'Internal server error'
-        });
-      }
-
-      if (row) {
-        console.log(`User logged in: ${row.email}`);
-        res.json({ success: true, email: row.email });
-      } else {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid credentials',
-          error: 'Invalid credentials'
-        });
-      }
+  try {
+    const user = await User.findOne({ email }).lean();
+    if (user && bcrypt.compareSync(password, user.password)) {
+      console.log(`User logged in: ${user.email}`);
+      return res.json({ success: true, email: user.email });
     }
-  );
+    return res.status(401).json({ success: false, message: 'Invalid credentials', error: 'Invalid credentials' });
+  } catch (err) {
+    console.error('Login database error:', err.message);
+    return res.status(500).json({ success: false, message: 'Internal server error', error: 'Internal server error' });
+  }
 });
 
 // ============================
 // GET PROFILE
 // ============================
-app.get('/profile', (req, res) => {
+app.get('/profile', async (req, res) => {
   const { email } = req.query;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
 
-  db.get(
-    `SELECT passport, documentType, nationality FROM profiles WHERE email = ?`,
-    [email],
-    (err, row) => {
-      if (row) {
-        res.json({
-          success: true,
-          profile: row,
-        });
-      } else {
-        res.json({
-          success: false,
-          profile: null,
-        });
-      }
-    }
-  );
+  try {
+    const row = await Profile.findOne({ email }).lean();
+    if (row) return res.json({ success: true, profile: { passport: row.passport, documentType: row.documentType, nationality: row.nationality } });
+    return res.json({ success: false, profile: null });
+  } catch (err) {
+    console.error('Profile GET error:', err.message);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 });
 
 // ============================
 // SAVE / UPDATE PROFILE
 // ============================
-app.post('/profile', (req, res) => {
+app.post('/profile', async (req, res) => {
   const { email, passport, documentType, nationality } = req.body;
+  console.log('PROFILE BODY:', req.body);
 
-  console.log("PROFILE BODY:", req.body);
-
-  // CHECK if passport exists for another user
-  db.get(
-    `SELECT email FROM profiles WHERE passport = ?`,
-    [passport],
-    (err, existing) => {
+  try {
+    if (passport) {
+      const existing = await Profile.findOne({ passport }).lean();
       if (existing && existing.email !== email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Passport already registered to another user',
-        });
+        return res.status(400).json({ success: false, message: 'Passport already registered to another user' });
       }
-
-      // Insert or replace profile
-      db.run(
-        `
-        INSERT INTO profiles (email, passport, documentType, nationality)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(email) DO UPDATE SET
-          passport = excluded.passport,
-          documentType = excluded.documentType,
-          nationality = excluded.nationality
-        `,
-        [email, passport, documentType, nationality],
-        function (err) {
-          if (err) {
-            console.log("PROFILE SAVE ERROR:", err.message);
-            return res.status(500).json({
-              success: false,
-              message: 'Database error',
-            });
-          }
-
-          res.json({ success: true });
-        }
-      );
     }
-  );
+
+    await Profile.findOneAndUpdate(
+      { email },
+      { email, passport, documentType, nationality },
+      { upsert: true }
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.log('PROFILE SAVE ERROR:', err.message);
+    return res.status(500).json({ success: false, message: 'Database error' });
+  }
 });
 
 // ============================
 // EMERGENCY CONTACTS
 // ============================
 
-app.get('/contacts', (req, res) => {
+app.get('/contacts', async (req, res) => {
   const { email } = req.query;
   if (!email) return res.status(400).json({ success: false, message: 'Email required' });
 
-  db.all(`SELECT * FROM contacts WHERE user_email = ?`, [email], (err, rows) => {
-    if (err) return res.status(500).json({ success: false, message: err.message });
-    res.json({ success: true, contacts: rows });
-  });
-});
-
-app.post('/contacts', (req, res) => {
-  const { email, name, phone, relationship } = req.body;
-  if (!email || !name || !phone) {
-    return res.status(400).json({ success: false, message: 'Missing fields' });
+  try {
+    const rows = await Contact.find({ user_email: email }).lean();
+    return res.json({ success: true, contacts: rows });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
   }
-
-  db.run(
-    `INSERT INTO contacts (user_email, name, phone, relationship) VALUES (?, ?, ?, ?)`,
-    [email, name, phone, relationship],
-    function (err) {
-      if (err) return res.status(500).json({ success: false, message: err.message });
-      res.json({ success: true, id: this.lastID });
-    }
-  );
 });
 
-app.delete('/contacts/:id', (req, res) => {
+app.post('/contacts', async (req, res) => {
+  const { email, name, phone, relationship } = req.body;
+  if (!email || !name || !phone) return res.status(400).json({ success: false, message: 'Missing fields' });
+
+  try {
+    const c = await Contact.create({ user_email: email, name, phone, relationship });
+    return res.json({ success: true, id: c._id });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/contacts/:id', async (req, res) => {
   const { id } = req.params;
-  db.run(`DELETE FROM contacts WHERE id = ?`, [id], function (err) {
-    if (err) return res.status(500).json({ success: false, message: err.message });
-    res.json({ success: true });
-  });
+
+  try {
+    // If id looks like a number, try legacy_id; else try ObjectId
+    if (/^\d+$/.test(id)) {
+      await Contact.deleteOne({ legacy_id: Number(id) });
+    } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      await Contact.deleteOne({ _id: id });
+    } else {
+      // Fallback: try both
+      await Contact.deleteOne({ $or: [{ legacy_id: Number(id) }, { _id: id }] });
+    }
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 });
 
-app.listen(3000, '0.0.0.0', () => {
-  console.log('🚀 Backend running on http://0.0.0.0:3000');
+// ============================
+// LOCATION ENDPOINTS
+// Devices should POST their coords periodically. Example body:
+// { email, lat, lng, accuracy, timestamp }
+// ============================
+app.post('/location', async (req, res) => {
+  const { email, lat, lng, accuracy, timestamp } = req.body;
+  if (!email || lat == null || lng == null) return res.status(400).json({ success: false, message: 'Missing fields' });
+
+  try {
+    const loc = await Location.create({ email, lat, lng, accuracy, timestamp: timestamp ? new Date(timestamp) : undefined });
+    // Optionally keep last location on user document
+    await User.updateOne({ email }, { $set: { lastLocation: { lat, lng, accuracy, timestamp: loc.timestamp } } });
+    return res.json({ success: true, id: loc._id });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/location/latest', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    const loc = await Location.findOne({ email }).sort({ timestamp: -1 }).lean();
+    if (!loc) return res.json({ success: false, location: null });
+    return res.json({ success: true, location: loc });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
 });
