@@ -1,4 +1,8 @@
-# Miscellaneous
+.DS_Store
+.env
+/backend/node_modules/
+/build/
+/.vscode/# Miscellaneous
 *.class
 *.log
 *.pyc
