@@ -5,9 +5,33 @@
 // ===============================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
-class SosActiveScreen extends StatelessWidget {
-  const SosActiveScreen({super.key});
+class SosActiveScreen extends StatefulWidget {
+  final bool playSiren;
+
+  const SosActiveScreen({super.key, this.playSiren = false});
+
+  @override
+  State<SosActiveScreen> createState() => _SosActiveScreenState();
+}
+
+class _SosActiveScreenState extends State<SosActiveScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.playSiren) {
+      FlutterRingtonePlayer().playAlarm(looping: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.playSiren) {
+      FlutterRingtonePlayer().stop();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +75,9 @@ class SosActiveScreen extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
+                       if (widget.playSiren) {
+                         FlutterRingtonePlayer().stop();
+                       }
                        Navigator.popUntil(context, (route) => route.isFirst);
                     },
                     child: const Text(

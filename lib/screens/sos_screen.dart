@@ -13,6 +13,7 @@ class SosScreen extends StatefulWidget {
 
 class _SosScreenState extends State<SosScreen> {
   bool _isSending = false;
+  bool _playSiren = true;
 
   Future<void> _sendSos() async {
     setState(() => _isSending = true);
@@ -73,7 +74,7 @@ class _SosScreenState extends State<SosScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const SosActiveScreen()),
+          MaterialPageRoute(builder: (context) => SosActiveScreen(playSiren: _playSiren)),
         );
       }
     } catch (e) {
@@ -122,7 +123,34 @@ class _SosScreenState extends State<SosScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white70),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: SwitchListTile(
+                  title: const Text(
+                    'Sound Alarm Siren',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text(
+                    'Plays a loud siren to attract attention',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                  value: _playSiren,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _playSiren = value;
+                    });
+                  },
+                  activeColor: Colors.white,
+                  activeTrackColor: Colors.red.shade300,
+                  inactiveThumbColor: Colors.white54,
+                  inactiveTrackColor: Colors.white24,
+                ),
+              ),
+              const SizedBox(height: 30),
               _isSending
                   ? const CircularProgressIndicator(color: Colors.white)
                   : SizedBox(

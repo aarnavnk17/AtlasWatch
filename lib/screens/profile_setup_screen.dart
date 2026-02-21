@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/session_service.dart';
 import 'dashboard_screen.dart';
+import 'login_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   final bool isEditMode;
@@ -70,10 +71,21 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save profile')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to save profile')));
       }
+    }
+  }
+
+  Future<void> _logout() async {
+    await _session.logout();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -87,6 +99,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       appBar: AppBar(
         title: const Text('Profile Details'),
         automaticallyImplyLeading: widget.isEditMode,
+        actions: [
+          if (!widget.isEditMode)
+            TextButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+            ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
