@@ -411,6 +411,11 @@ app.get('/admin/users', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
+  });
+}
+
+// Export for Vercel serverless hosting
+module.exports = app;
