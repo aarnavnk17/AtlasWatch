@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 /// Automatically detects and connects to backend across all device types.
 
 class BackendService {
-  static const Duration _httpTimeout = Duration(seconds: 3);
+  static const Duration _probeTimeout = Duration(seconds: 2);
+  static const Duration _requestTimeout = Duration(seconds: 15);
   static String? _workingBaseUrl;
 
   /// Comprehensive list of backend candidates to try, in priority order.
@@ -62,7 +63,7 @@ class BackendService {
     for (final candidate in _candidates) {
       try {
         final uri = Uri.parse('$candidate/');
-        final response = await http.get(uri).timeout(_httpTimeout);
+        final response = await http.get(uri).timeout(_probeTimeout);
 
         // Success - any response means connection works
         _workingBaseUrl = candidate;
@@ -88,7 +89,7 @@ class BackendService {
   }) async {
     final base = await _findWorkingBase();
     final uri = Uri.parse(base + path);
-    return http.get(uri, headers: headers).timeout(_httpTimeout);
+    return http.get(uri, headers: headers).timeout(_requestTimeout);
   }
 
   static Future<http.Response> post(
@@ -98,7 +99,7 @@ class BackendService {
   }) async {
     final base = await _findWorkingBase();
     final uri = Uri.parse(base + path);
-    return http.post(uri, headers: headers, body: body).timeout(_httpTimeout);
+    return http.post(uri, headers: headers, body: body).timeout(_requestTimeout);
   }
 
   static Future<http.Response> delete(
@@ -107,6 +108,6 @@ class BackendService {
   }) async {
     final base = await _findWorkingBase();
     final uri = Uri.parse(base + path);
-    return http.delete(uri, headers: headers).timeout(_httpTimeout);
+    return http.delete(uri, headers: headers).timeout(_requestTimeout);
   }
 }

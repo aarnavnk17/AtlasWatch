@@ -11,7 +11,7 @@ class AuthService {
         '/register',
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200) {
         return null;
@@ -33,7 +33,7 @@ class AuthService {
         '/login',
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 10));
+      );
 
       if (response.statusCode == 200) {
         return null;
