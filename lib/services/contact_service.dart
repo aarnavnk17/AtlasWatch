@@ -3,7 +3,7 @@ import 'backend_service.dart';
 import 'session_service.dart';
 
 class EmergencyContact {
-  final int? id;
+  final String? id;
   final String name;
   final String phone;
   final String? relationship;
@@ -17,7 +17,7 @@ class EmergencyContact {
 
   factory EmergencyContact.fromJson(Map<String, dynamic> json) {
     return EmergencyContact(
-      id: json['id'],
+      id: json['_id']?.toString() ?? json['id']?.toString(),
       name: json['name'],
       phone: json['phone'],
       relationship: json['relationship'],
@@ -73,9 +73,32 @@ class ContactService {
     }
   }
 
-  Future<bool> deleteContact(int id) async {
+  Future<bool> deleteContact(String id) async {
     try {
       final response = await BackendService.delete('/contacts/$id');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateContact(
+    String id,
+    String name,
+    String phone,
+    String relationship,
+  ) async {
+    try {
+      final response = await BackendService.post(
+        '/contacts/$id', // We'll implement PUT/POST on backend for updates
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'phone': phone,
+          'relationship': relationship,
+        }),
+      );
+
       return response.statusCode == 200;
     } catch (e) {
       return false;

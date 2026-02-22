@@ -280,6 +280,30 @@ app.post('/contacts', async (req, res) => {
   }
 });
 
+app.post('/contacts/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, phone, relationship } = req.body;
+
+  try {
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (phone) updateData.phone = phone;
+    if (relationship !== undefined) updateData.relationship = relationship;
+
+    if (/^\d+$/.test(id)) {
+      await Contact.updateOne({ legacy_id: Number(id) }, { $set: updateData });
+    } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      await Contact.updateOne({ _id: id }, { $set: updateData });
+    } else {
+      await Contact.updateOne({ $or: [{ legacy_id: Number(id) }, { _id: id }] }, { $set: updateData });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.delete('/contacts/:id', async (req, res) => {
   const { id } = req.params;
 

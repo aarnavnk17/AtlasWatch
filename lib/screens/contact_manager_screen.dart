@@ -95,6 +95,50 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
     );
   }
 
+  void _showEditDialog(EmergencyContact contact) {
+    _nameController.text = contact.name;
+    _phoneController.text = contact.phone;
+    _relationController.text = contact.relationship ?? '';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Contact'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: _phoneController, decoration: const InputDecoration(labelText: 'Phone'), keyboardType: TextInputType.phone),
+            TextField(controller: _relationController, decoration: const InputDecoration(labelText: 'Relationship (Optional)')),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              if (_nameController.text.isEmpty || _phoneController.text.isEmpty) return;
+              if (contact.id != null) {
+                await _contactService.updateContact(
+                  contact.id!,
+                  _nameController.text,
+                  _phoneController.text,
+                  _relationController.text,
+                );
+              }
+              _nameController.clear();
+              _phoneController.clear();
+              _relationController.clear();
+              if (!context.mounted) return;
+              Navigator.pop(context);
+              _loadContacts();
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -119,13 +163,22 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
                     return ListTile(
                       title: Text(contact.name),
                       subtitle: Text('${contact.phone} (${contact.relationship ?? "N/A"})'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          await _contactService.deleteContact(contact.id!);
-                          if (!mounted) return;
-                          _loadContacts();
-                        },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _showEditDialog(contact),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              await _contactService.deleteContact(contact.id!);
+                              if (!mounted) return;
+                              _loadContacts();
+                            },
+                          ),
+                        ],
                       ),
                     );
                   },
