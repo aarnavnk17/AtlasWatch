@@ -21,7 +21,17 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
   void initState() {
     super.initState();
     if (widget.playSiren) {
-      FlutterRingtonePlayer().playAlarm(looping: true);
+      try {
+        FlutterRingtonePlayer().play(
+          android: AndroidSounds.ringtone,
+          ios: IosSounds.alarm,
+          looping: true,
+          volume: 1.0,
+          asAlarm: true, // This forces sound even if phone is on silent
+        );
+      } catch (e) {
+        debugPrint('Error playing siren sound: $e');
+      }
     }
   }
 
