@@ -19,7 +19,9 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
-  profile_completed: { type: Boolean, default: false }
+  profile_completed: { type: Boolean, default: false },
+  lastLocation: { type: Object },
+  active_journey: { type: Object, default: null }
 }, { timestamps: true });
 
 const profileSchema = new mongoose.Schema({
@@ -329,13 +331,13 @@ app.delete('/contacts/:id', async (req, res) => {
 // { email, lat, lng, accuracy, timestamp }
 // ============================
 app.post('/location', async (req, res) => {
-  const { email, lat, lng, accuracy, timestamp } = req.body;
+  const { email, lat, lng, accuracy, timestamp, riskLevel } = req.body;
   if (!email || lat == null || lng == null) return res.status(400).json({ success: false, message: 'Missing fields' });
 
   try {
     const loc = await Location.create({ email, lat, lng, accuracy, timestamp: timestamp ? new Date(timestamp) : undefined });
-    // Optionally keep last location on user document
-    await User.updateOne({ email }, { $set: { lastLocation: { lat, lng, accuracy, timestamp: loc.timestamp } } });
+    // Keep last location and explicitly store riskLevel on user document
+    await User.updateOne({ email }, { $set: { lastLocation: { lat, lng, accuracy, riskLevel, timestamp: loc.timestamp } } });
     return res.json({ success: true, id: loc._id });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -350,6 +352,59 @@ app.get('/location/latest', async (req, res) => {
     const loc = await Location.findOne({ email }).sort({ timestamp: -1 }).lean();
     if (!loc) return res.json({ success: false, location: null });
     return res.json({ success: true, location: loc });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================
+// JOURNEY TRACKING
+// ============================
+app.post('/journey', async (req, res) => {
+  const { email, startLocation, endLocation, mode, reference, riskLevel } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    const journey = { startLocation, endLocation, mode, reference, riskLevel, startTime: new Date() };
+    await User.updateOne({ email }, { $set: { active_journey: journey } });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/journey', async (req, res) => {
+  const userEmail = req.body.email || req.query.email;
+  if (!userEmail) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    await User.updateOne({ email: userEmail }, { $set: { active_journey: null } });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================
+// ADMIN ENDPOINT
+// ============================
+app.get('/admin/users', async (req, res) => {
+  try {
+    const users = await User.find({}).lean();
+
+    // Attach profile info
+    const fullUsers = await Promise.all(users.map(async (u) => {
+      const profile = await Profile.findOne({ email: u.email }).lean();
+      return {
+        email: u.email,
+        profileComplete: u.profile_completed,
+        profile: profile ? { passport: profile.passport, documentType: profile.documentType, nationality: profile.nationality } : null,
+        lastLocation: u.lastLocation || null,
+        activeJourney: u.active_journey || null
+      };
+    }));
+
+    return res.json({ success: true, users: fullUsers });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

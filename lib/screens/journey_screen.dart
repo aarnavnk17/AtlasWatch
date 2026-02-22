@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/risk_level.dart';
 import '../data/city_coordinates.dart';
+import '../services/journey_service.dart';
 
 class JourneyScreen extends StatefulWidget {
   final RiskLevel riskLevel;
@@ -29,6 +30,7 @@ class JourneyScreen extends StatefulWidget {
 
 class _JourneyScreenState extends State<JourneyScreen> {
   final MapController _mapController = MapController();
+  final JourneyService _journeyService = JourneyService();
   List<LatLng> _routePoints = [];
   LatLng? _startLatLng;
   LatLng? _endLatLng;
@@ -40,6 +42,22 @@ class _JourneyScreenState extends State<JourneyScreen> {
   void initState() {
     super.initState();
     _fetchRoute();
+    
+    // Start journey on backend
+    _journeyService.startJourney(
+      startLocation: widget.startLocation,
+      endLocation: widget.endLocation,
+      mode: widget.mode,
+      reference: widget.reference,
+      riskLevel: widget.riskLevel.toString().split('.').last, // e.g., 'high', 'low'
+    );
+  }
+
+  @override
+  void dispose() {
+    // End journey when screen is popped/closed
+    _journeyService.endJourney();
+    super.dispose();
   }
 
   Future<void> _fetchRoute() async {
