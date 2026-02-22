@@ -8,8 +8,17 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-                const response = await fetch(`${backendUrl}/admin/users`);
+                const backendUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+                const requestUrl = `${backendUrl}/admin/users`;
+
+                const response = await fetch(requestUrl);
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const textContent = await response.text();
+                    throw new Error(`Expected JSON but got HTML/Text instead from ${requestUrl}. Check your VITE_BACKEND_URL environment variable.`);
+                }
+
                 const data = await response.json();
                 if (data.success) {
                     setUsers(data.users);
