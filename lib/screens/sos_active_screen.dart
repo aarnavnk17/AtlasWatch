@@ -109,7 +109,7 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
                   },
                   child: const Text(
                     "I'M NOW SAFE",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.black, letterSpacing: 1),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1),
                   ),
                 ),
               ),
