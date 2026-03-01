@@ -385,37 +385,7 @@ app.delete('/journey', async (req, res) => {
   }
 });
 
-// ============================
-// ADMIN ENDPOINT
-// ============================
-app.get('/admin/users', async (req, res) => {
-  try {
-    const users = await User.find({}).lean();
-
-    // Attach profile info
-    const fullUsers = await Promise.all(users.map(async (u) => {
-      const profile = await Profile.findOne({ email: u.email }).lean();
-      return {
-        email: u.email,
-        profileComplete: u.profile_completed,
-        profile: profile ? { passport: profile.passport, documentType: profile.documentType, nationality: profile.nationality } : null,
-        lastLocation: u.lastLocation || null,
-        activeJourney: u.active_journey || null
-      };
-    }));
-
-    return res.json({ success: true, users: fullUsers });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
-  });
-}
-
-// Export for Vercel serverless hosting
-module.exports = app;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Backend running on http://0.0.0.0:${PORT}`);
+});
