@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geocoding/geocoding.dart';
 import '../models/risk_level.dart';
 import '../services/location_service.dart';
 import 'journey_loading_screen.dart';
@@ -14,19 +17,49 @@ class JourneyDetailsScreen extends StatefulWidget {
 
 class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _startController = TextEditingController();
   final _endController = TextEditingController();
   final _referenceController = TextEditingController();
-
   String _mode = 'Car';
-
   bool _loadingLocation = true;
+
+  final MapController _mapController = MapController();
+  LatLng? _previewLatLng;
 
   @override
   void initState() {
     super.initState();
     _fetchLocation();
+    _endController.addListener(_onDestinationChanged);
+  }
+
+  @override
+  void dispose() {
+    _startController.dispose();
+    _endController.dispose();
+    _referenceController.dispose();
+    super.dispose();
+  }
+
+  void _onDestinationChanged() {
+    // Simple debounce/delay to avoid too many geocoding calls
+    if (_endController.text.length < 3) return;
+    _updatePreview(_endController.text);
+  }
+
+  Future<void> _updatePreview(String query) async {
+    try {
+      List<Location> locations = await locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        final loc = LatLng(locations.first.latitude, locations.first.longitude);
+        if (mounted) {
+          setState(() => _previewLatLng = loc);
+          _mapController.move(loc, 16.5); // High zoom for building names
+        }
+      }
+    } catch (e) {
+      // Quietly ignore geocoding errors while typing
+    }
   }
 
   Future<void> _fetchLocation() async {
@@ -37,6 +70,10 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
       _loadingLocation = false;
       if (result?.address != null) {
         _startController.text = result!.address!;
+      }
+      if (result != null) {
+        final loc = LatLng(result.position.latitude, result.position.longitude);
+        _previewLatLng = loc;
       }
     });
   }
@@ -97,6 +134,10 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
                         decoration: _inputDecoration('Where are you going?', Icons.location_on_outlined),
                         validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                       ),
+                      const SizedBox(height: 20),
+
+                      // --- MAP PREVIEW ---
+                      _buildMapPreview(),
                       const SizedBox(height: 24),
 
                       _buildFieldLabel('Travel Mode'),
@@ -223,6 +264,93 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
       filled: true,
       fillColor: const Color(0xFF2C2C2C),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  Widget _buildMapPreview() {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF121212),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _previewLatLng ?? const LatLng(19.0760, 72.8777), // Default: Mumbai if null
+              initialZoom: 14,
+              minZoom: 2,
+              maxZoom: 18,
+              interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
+                userAgentPackageName: 'com.atlaswatch.app',
+                retinaMode: RetinaMode.isHighDensity,
+              ),
+              if (_previewLatLng != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _previewLatLng!,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.location_on_rounded, color: Colors.blue, size: 30),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          // --- ZOOM OVERLAY ---
+          Positioned(
+            right: 12,
+            top: 12,
+            child: Column(
+              children: [
+                _miniMapButton(Icons.add_rounded, () {
+                  _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
+                }),
+                const SizedBox(height: 6),
+                _miniMapButton(Icons.remove_rounded, () {
+                  _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
+                }),
+              ],
+            ),
+          ),
+          if (_previewLatLng == null)
+            const Center(
+              child: Text(
+                'Enter destination to see preview',
+                style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _miniMapButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          child: Icon(icon, color: Colors.white, size: 16),
+        ),
+      ),
     );
   }
 }

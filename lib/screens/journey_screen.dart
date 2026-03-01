@@ -227,6 +227,8 @@ class _JourneyScreenState extends State<JourneyScreen> {
                       options: MapOptions(
                         initialCenter: _startLatLng!,
                         initialZoom: 12,
+                        minZoom: 2,
+                        maxZoom: 18,
                         interactionOptions: const InteractionOptions(
                           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                         ),
@@ -274,6 +276,26 @@ class _JourneyScreenState extends State<JourneyScreen> {
                         ),
                       ],
                     ),
+
+          // --- ZOOM CONTROLS ---
+          if (!_loadingRoute && _startLatLng != null)
+            Positioned(
+              right: 20,
+              top: 20,
+              child: Column(
+                children: [
+                  _mapButton(Icons.add_rounded, () {
+                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
+                  }),
+                  const SizedBox(height: 8),
+                  _mapButton(Icons.remove_rounded, () {
+                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
+                  }),
+                  const SizedBox(height: 8),
+                  _mapButton(Icons.my_location_rounded, () => _fitRoute()),
+                ],
+              ),
+            ),
 
           // --- OVERLAY INFO PANEL ---
           Align(
@@ -392,6 +414,25 @@ class _JourneyScreenState extends State<JourneyScreen> {
           ],
         ),
       ],
+    );
+  Widget _mapButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: const Color(0xFF2C2C2C),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      elevation: 4,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
     );
   }
 }
