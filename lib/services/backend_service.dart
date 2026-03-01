@@ -110,4 +110,8 @@ class BackendService {
     final uri = Uri.parse(base + path);
     return http.delete(uri, headers: headers).timeout(_requestTimeout);
   }
+
+  static Future<String> getBaseUrl() async {
+    return _findWorkingBase();
+  }
 }

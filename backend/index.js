@@ -3,6 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -48,6 +51,37 @@ const contactSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Profile = mongoose.model('Profile', profileSchema);
 const Contact = mongoose.model('Contact', contactSchema);
+
+const documentSchema = new mongoose.Schema({
+  user_email: { type: String, required: true, index: true },
+  originalName: String,
+  fileName: String,
+  fileType: String,
+  fileUrl: String,
+  category: { type: String, enum: ['Ticket', 'Hotel', 'Insurance', 'Passport', 'Other'], default: 'Other' },
+  uploadDate: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const Document = mongoose.model('Document', documentSchema);
+
+// Configure Multer for File Uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const locationSchema = new mongoose.Schema({
   email: { type: String, required: true, index: true },
@@ -419,6 +453,59 @@ app.delete('/journey', async (req, res) => {
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
+  }
+});
+// ============================
+// DOCUMENT VAULT
+// ============================
+
+app.post('/documents/upload', upload.single('file'), async (req, res) => {
+  const { email, category } = req.body;
+  if (!email || !req.file) return res.status(400).json({ success: false, message: 'Missing file or email' });
+
+  try {
+    const doc = await Document.create({
+      user_email: email,
+      originalName: req.file.originalname,
+      fileName: req.file.filename,
+      fileType: req.file.mimetype,
+      fileUrl: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+      category: category || 'Other'
+    });
+    res.json({ success: true, document: doc });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/documents', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    const docs = await Document.find({ user_email: email }).sort({ createdAt: -1 }).lean();
+    res.json({ success: true, documents: docs });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/documents/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const doc = await Document.findById(id);
+    if (!doc) return res.status(404).json({ success: false, message: 'Document not found' });
+
+    // Delete physically
+    const filePath = path.join(__dirname, 'uploads', doc.fileName);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    await Document.findByIdAndDelete(id);
+    res.json({ success: true, message: 'Document deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

@@ -46,6 +46,9 @@ dependencies:
   flutter_contacts: ^1.1.9+2
   permission_handler: ^11.3.1
   flutter_ringtone_player: ^4.0.0+4
+  file_picker: ^8.1.7 
+  path_provider: ^2.1.2 
+  open_filex: ^4.5.0
 
 dev_dependencies:
   flutter_test:

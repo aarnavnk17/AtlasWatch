@@ -104,85 +104,106 @@ class _SosScreenState extends State<SosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red.shade900,
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Center(
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.warning, size: 120, color: Colors.white),
               const SizedBox(height: 20),
               const Text(
-                'EMERGENCY MODE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Emergency SOS',
+                style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               const Text(
-                'Pressing confirm will send your live location to your emergency contacts.',
+                'Pressing the button below will alert your\nemergency contacts immediately.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Colors.grey, fontSize: 15),
               ),
-              const SizedBox(height: 30),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: SwitchListTile(
-                  title: const Text(
-                    'Sound Alarm Siren',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              
+              const Spacer(),
+
+              // --- BIG SOS BUTTON ---
+              GestureDetector(
+                onTap: _isSending ? null : _sendSos,
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _isSending ? Colors.grey.shade900 : const Color(0xFFE53935),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE53935).withOpacity(0.3),
+                        blurRadius: _isSending ? 0 : 40,
+                        spreadRadius: _isSending ? 0 : 10,
+                      ),
+                    ],
+                    border: Border.all(color: Colors.white.withOpacity(0.1), width: 8),
                   ),
-                  subtitle: const Text(
-                    'Plays a loud siren to attract attention',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                  value: _playSiren,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _playSiren = value;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: Colors.red.shade300,
-                  inactiveThumbColor: Colors.white54,
-                  inactiveTrackColor: Colors.white24,
-                ),
-              ),
-              const SizedBox(height: 30),
-              _isSending
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.red.shade900,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                  child: Center(
+                    child: _isSending
+                        ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 4)
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, size: 64, color: Colors.white),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'HELP',
+                                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 2),
+                              ),
+                            ],
                           ),
-                        ),
-                        onPressed: _sendSos,
-                        child: const Text(
-                          'CONFIRM SOS',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              // --- SIREN CARD ---
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E1E),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.03)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                      child: Icon(Icons.volume_up_rounded, color: Colors.blue.shade400, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Alarm Siren', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text('Plays a loud sound locally', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        ],
                       ),
                     ),
+                    Switch.adaptive(
+                      value: _playSiren,
+                      activeColor: Colors.blue.shade400,
+                      onChanged: (val) => setState(() => _playSiren = val),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
