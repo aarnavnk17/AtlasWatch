@@ -27,9 +27,14 @@ const userSchema = new mongoose.Schema({
 
 const profileSchema = new mongoose.Schema({
   email: { type: String, required: true, index: true },
+  fullName: String,
+  phoneNumber: String,
   passport: { type: String, unique: false },
   documentType: String,
-  nationality: String
+  nationality: String,
+  bloodGroup: String,
+  medicalConditions: String,
+  allergies: String
 }, { timestamps: true });
 
 const contactSchema = new mongoose.Schema({
@@ -216,7 +221,21 @@ app.get('/profile', async (req, res) => {
 
   try {
     const row = await Profile.findOne({ email }).lean();
-    if (row) return res.json({ success: true, profile: { passport: row.passport, documentType: row.documentType, nationality: row.nationality } });
+    if (row) {
+      return res.json({
+        success: true,
+        profile: {
+          fullName: row.fullName,
+          phoneNumber: row.phoneNumber,
+          passport: row.passport,
+          documentType: row.documentType,
+          nationality: row.nationality,
+          bloodGroup: row.bloodGroup,
+          medicalConditions: row.medicalConditions,
+          allergies: row.allergies
+        }
+      });
+    }
     return res.json({ success: false, profile: null });
   } catch (err) {
     console.error('Profile GET error:', err.message);
@@ -228,7 +247,17 @@ app.get('/profile', async (req, res) => {
 // SAVE / UPDATE PROFILE
 // ============================
 app.post('/profile', async (req, res) => {
-  const { email, passport, documentType, nationality } = req.body;
+  const {
+    email,
+    fullName,
+    phoneNumber,
+    passport,
+    documentType,
+    nationality,
+    bloodGroup,
+    medicalConditions,
+    allergies
+  } = req.body;
   console.log('PROFILE BODY:', req.body);
 
   try {
@@ -241,7 +270,17 @@ app.post('/profile', async (req, res) => {
 
     await Profile.findOneAndUpdate(
       { email },
-      { email, passport, documentType, nationality },
+      {
+        email,
+        fullName,
+        phoneNumber,
+        passport,
+        documentType,
+        nationality,
+        bloodGroup,
+        medicalConditions,
+        allergies
+      },
       { upsert: true }
     );
 

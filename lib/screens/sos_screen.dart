@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'sos_active_screen.dart';
 import '../services/contact_service.dart';
+import '../services/session_service.dart';
 
 class SosScreen extends StatefulWidget {
   const SosScreen({super.key});
@@ -24,12 +25,14 @@ class _SosScreenState extends State<SosScreen> {
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
 
-      // 2. Fetch Contacts
+      // 2. Fetch Contacts & Profile
       final contactService = ContactService();
+      final sessionService = SessionService();
+      
       final contacts = await contactService.getContacts();
+      final profile = await sessionService.loadProfile();
       
       // 3. Prepare SMS
-      // Recipients: All emergency contacts (Testing mode: Police removed)
       List<String> recipients = [];
       for (var c in contacts) {
         recipients.add(c.phone);
@@ -44,10 +47,19 @@ class _SosScreenState extends State<SosScreen> {
         return;
       }
 
-      final String message = "HELP! I am in danger. My location: https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}";
+      // Build medical summary for the message
+      String medicalInfo = "";
+      if (profile != null) {
+        final name = profile['fullName'] ?? "User";
+        final blood = profile['bloodGroup'] ?? "Unknown";
+        final allergies = profile['allergies'] ?? "None";
+        final conditions = profile['medicalConditions'] ?? "None";
+        
+        medicalInfo = "\n\nCRITICAL INFO:\nName: $name\nBlood: $blood\nAllergies: $allergies\nConditions: $conditions";
+      }
+
+      final String message = "HELP! I am in danger. My location: https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}$medicalInfo";
       
-      // For cross-platform SMS with multiple recipients, we join with comma or semicolon
-      // Android usually uses comma, iOS uses comma. 
       final String path = recipients.join(',');
       
       final Uri smsLaunchUri = Uri(

@@ -116,9 +116,14 @@ class SessionService {
   // SAVE PROFILE TO BACKEND
   // ================================
   Future<bool> saveProfile({
-    required String passport,
-    required String documentType,
-    required String nationality,
+    String? fullName,
+    String? phoneNumber,
+    String? passport,
+    String? documentType,
+    String? nationality,
+    String? bloodGroup,
+    String? medicalConditions,
+    String? allergies,
   }) async {
     final email = await getEmail();
     if (email == null) return false;
@@ -129,9 +134,14 @@ class SessionService {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
+          'fullName': fullName,
+          'phoneNumber': phoneNumber,
           'passport': passport,
           'documentType': documentType,
           'nationality': nationality,
+          'bloodGroup': bloodGroup,
+          'medicalConditions': medicalConditions,
+          'allergies': allergies,
         }),
       );
 
