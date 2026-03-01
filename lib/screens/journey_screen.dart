@@ -242,7 +242,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                           urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
                           subdomains: const ['a', 'b', 'c', 'd'],
                           userAgentPackageName: 'com.atlaswatch.app',
-                          retinaMode: RetinaMode.isHighDensity,
+                          retinaMode: RetinaMode.isHighDensity(context),
                         ),
                         PolylineLayer(
                           polylines: [
@@ -415,12 +415,14 @@ class _JourneyScreenState extends State<JourneyScreen> {
         ),
       ],
     );
+  }
+
   Widget _mapButton(IconData icon, VoidCallback onTap) {
     return Material(
       color: const Color(0xFF2C2C2C),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        side: BorderSide(color: Colors.white.withOpacity(0.05)),
       ),
       elevation: 4,
       child: InkWell(

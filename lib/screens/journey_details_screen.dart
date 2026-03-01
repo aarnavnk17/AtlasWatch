@@ -265,6 +265,8 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
       fillColor: const Color(0xFF2C2C2C),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
+  }
+
   Widget _buildMapPreview() {
     return Container(
       height: 200,
@@ -291,7 +293,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
                 urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
                 subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.atlaswatch.app',
-                retinaMode: RetinaMode.isHighDensity,
+                retinaMode: RetinaMode.isHighDensity(context),
               ),
               if (_previewLatLng != null)
                 MarkerLayer(
@@ -339,7 +341,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
       color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        side: BorderSide(color: Colors.white.withOpacity(0.05)),
       ),
       child: InkWell(
         onTap: onTap,
