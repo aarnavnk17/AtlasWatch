@@ -266,20 +266,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isEditMode: true))),
-          child: Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+        Row(
+          children: [
+            IconButton(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout_rounded, color: Colors.grey, size: 22),
+              tooltip: 'Sign Out',
             ),
-            child: CircleAvatar(
-              radius: 26,
-              backgroundColor: const Color(0xFF1E1E1E),
-              child: const Icon(Icons.person, color: Colors.blue, size: 28),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isEditMode: true))),
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+                ),
+                child: CircleAvatar(
+                  radius: 26,
+                  backgroundColor: const Color(0xFF1E1E1E),
+                  child: const Icon(Icons.person, color: Colors.blue, size: 28),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );

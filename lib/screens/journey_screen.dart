@@ -240,6 +240,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                           urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
                           subdomains: const ['a', 'b', 'c', 'd'],
                           userAgentPackageName: 'com.atlaswatch.app',
+                          retinaMode: RetinaMode.isHighDensity,
                         ),
                         PolylineLayer(
                           polylines: [
