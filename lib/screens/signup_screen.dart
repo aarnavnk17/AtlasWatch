@@ -95,28 +95,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  Widget _requirementRow(String text, bool isMet) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Icon(
-            isMet ? Icons.check_circle : Icons.circle_outlined,
-            size: 16,
-            color: isMet ? Colors.green : Colors.grey,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              color: isMet ? Colors.green : Colors.grey.shade700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
