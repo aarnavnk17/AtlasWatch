@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -171,8 +172,23 @@ app.post('/register', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Email and password are required', error: 'Email and password are required' });
   }
 
+  // Password Complexity Validation
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  if (password.length < minLength || !hasUpperCase || !hasNumber || !hasSpecialChar) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.',
+      error: 'Invalid password format'
+    });
+  }
+
   try {
-    const user = new User({ email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword });
     await user.save();
     console.log(`User registered: ${email}`);
     return res.json({ success: true });
@@ -198,9 +214,12 @@ app.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
-    if (user && user.password === password) {
-      console.log(`User logged in: ${user.email}`);
-      return res.json({ success: true, email: user.email });
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        console.log(`User logged in: ${user.email}`);
+        return res.json({ success: true, email: user.email });
+      }
     }
     return res.status(401).json({ success: false, message: 'Invalid credentials', error: 'Invalid credentials' });
   } catch (err) {
