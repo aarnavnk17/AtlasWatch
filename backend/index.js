@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const crimeData = require('./data/crime_data.json');
+
 
 // MongoDB connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/atlaswatch';
@@ -54,107 +54,86 @@ const locationSchema = new mongoose.Schema({
 
 const Location = mongoose.model('Location', locationSchema);
 
+const crimeStatSchema = new mongoose.Schema({
+  state: { type: String, required: true, index: true },
+  city: { type: String, required: true, index: true },
+  risk: String,
+  score: Number,
+  areas: mongoose.Schema.Types.Mixed,
+  lastUpdated: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const CrimeStat = mongoose.model('CrimeStat', crimeStatSchema);
+
 // ============================
-// CRIME STATS ENDPOINT
+// CRIME STATS ENDPOINT (DATABASE-POWERED)
 // ============================
-app.get('/crime-stats', (req, res) => {
+app.get('/crime-stats', async (req, res) => {
   const { area } = req.query;
   if (!area) return res.json({ score: 0 });
 
   const searchArea = area.toLowerCase();
-  let score = 0;
-  let found = false;
 
-  // Search in states -> cities -> areas
-  // Structure: State -> City -> { score, areas: { SubArea: score } }
+  try {
+    // 1. Try to find a direct city match
+    let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + searchArea + '$', 'i') } }).lean();
 
-  for (const state in crimeData) {
-    const cities = crimeData[state];
-    for (const city in cities) {
-      // Check City Match
-      if (city.toLowerCase() === searchArea) {
-        score = cities[city].score;
-        found = true;
-        break;
-      }
+    // 2. If no city match, search for cities that contain the search string
+    if (!stat) {
+      stat = await CrimeStat.findOne({ city: { $regex: new RegExp(searchArea, 'i') } }).lean();
+    }
 
-      // Check Sub-area Match
-      // Ideally we would want exact area match but for this demo simple scan is fine
-      // If the search query contains the city name, we might want to return city score
+    // 3. If still no match, search within the 'areas' Map of all cities
+    let score = 0;
+    let found = false;
 
-      if (searchArea.includes(city.toLowerCase())) {
-        score = cities[city].score;
-        found = true;
-        // If we have sub-areas, maybe refine?
-        // For now, let's just use city score if city is in the string
-        break;
-      }
-
-      // Check specific sub-areas
-      const subAreas = cities[city].areas;
-      if (subAreas) {
-        for (const sub in subAreas) {
-          if (sub.toLowerCase() === searchArea || searchArea.includes(sub.toLowerCase())) {
-            score = subAreas[sub];
-            found = true;
-            break;
+    if (stat) {
+      score = stat.score;
+      found = true;
+    } else {
+      // Deep search in all cities for a sub-area match
+      // Note: This is a bit expensive, but works for the current scale. 
+      // In a larger DB, we'd restructure the 'areas' into their own documents.
+      const allStats = await CrimeStat.find({}).lean();
+      for (const cityStat of allStats) {
+        if (cityStat.areas) {
+          for (const [subArea, subScore] of Object.entries(cityStat.areas)) {
+            if (subArea.toLowerCase() === searchArea || searchArea.includes(subArea.toLowerCase())) {
+              score = subScore;
+              found = true;
+              break;
+            }
           }
         }
+        if (found) break;
       }
-      if (found) break;
     }
-    if (found) break;
-  }
 
-  // Default random-ish score if not found, to keep it interesting for unknown places
-  if (!found) {
-    // Deterministic hash for consistency
-    let hash = 0;
-    for (let i = 0; i < searchArea.length; i++) {
-      hash = searchArea.charCodeAt(i) + ((hash << 5) - hash);
+    // Default random-ish score if not found
+    if (!found) {
+      let hash = 0;
+      for (let i = 0; i < searchArea.length; i++) {
+        hash = searchArea.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      score = Math.abs(hash % 500);
     }
-    score = Math.abs(hash % 500); // 0-500 random score
+
+    // Normalize Score for frontend (standard 0-300 range)
+    let finalScore = score;
+    if (score > 300) {
+      finalScore = Math.floor(score / 20);
+    }
+
+    res.json({
+      theft: Math.floor(finalScore / 4),
+      assault: Math.floor(finalScore / 4),
+      fraud: Math.floor(finalScore / 4)
+    });
+
+  } catch (err) {
+    console.error('CrimeStats DB Error:', err);
+    res.status(500).json({ success: false, message: 'Database error fetching crime stats' });
   }
-
-  // Normalize score to fit into frontend logic (Theft + Assault*2 + Fraud)
-  // Our frontend risk service: <100 Low, <200 Medium, >=200 High.
-  // My JSON scores are significantly higher (e.g. 3550).
-  // I should probably map/scale them down or update frontend.
-  // Wait, frontend logic:
-  // return theft + (assault * 2) + fraud;
-  // risk_service: <100 Low, <200 Medium, >= High
-
-  // My JSON scores are like 3000. This will always be High.
-  // I should scale the JSON scores down to 0-300 range.
-  // OR scale the return value.
-
-  // Let's scale down by factor of 20 roughly
-  // 3550 / 20 = 177 (Medium)
-  // 8920 / 20 = 446 (High)
-  // 1000 / 20 = 50 (Low)
-
-  // Let's just return the raw score but standardized to what frontend expects
-  // If I return 3550, frontend sees 3550. 
-  // RiskService: score < 100 (Low), < 200 (Medium).
-  // So anything > 200 is High.
-  // I need to adjust my JSON data or this logic. 
-  // Let's adjust this logic to return a "calculated" score that fits.
-
-  // Normalized Score for frontend
-  let finalScore = score;
-  if (score > 300) {
-    // If it's one of my big 3000 numbers, scale it.
-    finalScore = Math.floor(score / 20);
-  }
-
-  res.json({
-    theft: Math.floor(finalScore / 4),
-    assault: Math.floor(finalScore / 4),
-    fraud: Math.floor(finalScore / 4),
-    // We can also just return the raw breakdown if we want, but frontend sums them up.
-    // Frontend expects: theft, assault, fraud keys.
-    // And computes sum. 
-  });
 });
 
 // ============================
