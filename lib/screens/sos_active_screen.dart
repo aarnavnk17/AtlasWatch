@@ -46,58 +46,79 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red.shade700,
+      backgroundColor: const Color(0xFF121212),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.warning_rounded, color: Colors.white, size: 80),
-                const SizedBox(height: 20),
-                const Text(
-                  'SOS Activated',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // --- ACTIVE PULSE ---
+              Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(Icons.emergency_rounded, size: 100, color: Colors.redAccent),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Emergency assistance has been alerted.\nStay calm and remain in a safe place.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                
-                const SizedBox(height: 48),
+              ),
+              const SizedBox(height: 48),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white, width: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                       if (widget.playSiren) {
-                         FlutterRingtonePlayer().stop();
-                       }
-                       Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    child: const Text(
-                      "I'M SAFE",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+              const Text(
+                'SOS IS ACTIVE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Your live location and medical profile\nare being shared with your emergency\ncontacts and local authorities.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
+              ),
+
+              const Spacer(),
+
+              // --- SAFE BUTTON ---
+              SizedBox(
+                width: double.infinity,
+                height: 64,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 10,
+                    shadowColor: Colors.black45,
+                  ),
+                  onPressed: () {
+                    if (widget.playSiren) {
+                      FlutterRingtonePlayer().stop();
+                    }
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                  child: const Text(
+                    "I'M NOW SAFE",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.black, letterSpacing: 1),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Press only after securing yourself.',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
           ),
         ),
       ),
