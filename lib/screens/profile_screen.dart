@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/user_profile.dart';
+import '../widgets/sleek_animation.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -27,59 +28,85 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             children: [
               // --- AVATAR SECTION ---
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.blue.shade400.withOpacity(0.3), width: 2),
-                  ),
-                  child: CircleAvatar(
-                    radius: 56,
-                    backgroundColor: const Color(0xFF1E1E1E),
-                    backgroundImage: UserProfile.photoPath != null
-                        ? FileImage(File(UserProfile.photoPath!))
-                        : null,
-                    child: UserProfile.photoPath == null
-                        ? Icon(Icons.person_rounded, size: 50, color: Colors.blue.shade400)
-                        : null,
+              SleekAnimation(
+                type: SleekAnimationType.scale,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.blue.shade400.withOpacity(0.3), width: 2),
+                    ),
+                    child: CircleAvatar(
+                      radius: 56,
+                      backgroundColor: const Color(0xFF1E1E1E),
+                      backgroundImage: UserProfile.photoPath != null
+                          ? FileImage(File(UserProfile.photoPath!))
+                          : null,
+                      child: UserProfile.photoPath == null
+                          ? Icon(Icons.person_rounded, size: 50, color: Colors.blue.shade400)
+                          : null,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Verified Identity',
-                style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1),
+              const SleekAnimation(
+                delay: Duration(milliseconds: 200),
+                child: Text(
+                  'Verified Identity',
+                  style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1),
+                ),
               ),
 
               const SizedBox(height: 48),
 
               // --- PROFILE DATA ---
-              _infoTile('Document Type', UserProfile.documentType, Icons.description_outlined),
-              _infoTile('Document Number', UserProfile.documentNumber, Icons.badge_outlined),
-              _infoTile('Nationality', UserProfile.nationality, Icons.public_outlined),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 300),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0.05, 0),
+                child: _infoTile('Document Type', UserProfile.documentType, Icons.description_outlined),
+              ),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 400),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0.05, 0),
+                child: _infoTile('Document Number', UserProfile.documentNumber, Icons.badge_outlined),
+              ),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 500),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0.05, 0),
+                child: _infoTile('Nationality', UserProfile.nationality, Icons.public_outlined),
+              ),
 
               const Spacer(),
 
               // --- LOGOUT ACTION ---
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red.shade400,
-                    backgroundColor: Colors.red.withOpacity(0.05),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 600),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0, 0.1),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red.shade400,
+                      backgroundColor: Colors.red.withOpacity(0.05),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    icon: const Icon(Icons.logout_rounded),
+                    label: const Text('SIGN OUT', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
                   ),
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  },
-                  icon: const Icon(Icons.logout_rounded),
-                  label: const Text('SIGN OUT', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
                 ),
               ),
             ],

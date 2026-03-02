@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/session_service.dart';
+import '../widgets/sleek_animation.dart';
 import 'dashboard_screen.dart';
 import 'signup_screen.dart';
 import 'profile_setup_screen.dart';
@@ -83,104 +84,132 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 40),
               // --- LOGO SECTION ---
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.security_rounded,
-                    size: 80,
-                    color: Colors.blue,
+              SleekAnimation(
+                delay: const Duration(milliseconds: 200),
+                type: SleekAnimationType.scale,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.security_rounded,
+                      size: 80,
+                      color: Colors.blue,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 32),
-              const Text(
-                'AtlasWatch',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
+              const SleekAnimation(
+                delay: Duration(milliseconds: 400),
+                child: Column(
+                  children: [
+                    Text(
+                      'AtlasWatch',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Your Global Safety Companion',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Your Global Safety Companion',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
 
               const SizedBox(height: 64),
 
               // --- INPUT FIELDS ---
-              TextField(
-                controller: _emailController,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Email Address', Icons.alternate_email_rounded),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Password', Icons.lock_outline_rounded),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 600),
+                slideOffset: const Offset(0, 0.1),
+                type: SleekAnimationType.slide,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: _inputDecoration('Email Address', Icons.alternate_email_rounded),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: _inputDecoration('Password', Icons.lock_outline_rounded),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 48),
 
               // --- LOGIN BUTTON ---
-              SizedBox(
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
-                    shadowColor: Colors.black45,
+              SleekAnimation(
+                delay: const Duration(milliseconds: 800),
+                slideOffset: const Offset(0, 0.05),
+                type: SleekAnimationType.slide,
+                child: SizedBox(
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade600,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                      shadowColor: Colors.black45,
+                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Text(
+                            'SIGN IN',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                          ),
                   ),
-                  child: _loading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          'SIGN IN',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
-                        ),
                 ),
               ),
 
               const SizedBox(height: 24),
 
               // --- SIGNUP REDIRECT ---
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignupScreen()),
-                  );
-                },
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                    children: [
-                      const TextSpan(text: "Don't have an account? "),
-                      TextSpan(
-                        text: "Create Account",
-                        style: TextStyle(
-                          color: Colors.blue.shade400,
-                          fontWeight: FontWeight.bold,
+              SleekAnimation(
+                delay: const Duration(milliseconds: 1000),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignupScreen()),
+                    );
+                  },
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                      children: [
+                        const TextSpan(text: "Don't have an account? "),
+                        TextSpan(
+                          text: "Create Account",
+                          style: TextStyle(
+                            color: Colors.blue.shade400,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../services/document_service.dart';
+import '../widgets/sleek_animation.dart';
 
 class DocumentVaultScreen extends StatefulWidget {
   const DocumentVaultScreen({super.key});
@@ -146,7 +147,12 @@ class _DocumentVaultScreenState extends State<DocumentVaultScreen> {
                   itemCount: _documents.length,
                   itemBuilder: (context, index) {
                     final doc = _documents[index];
-                    return _buildDocCard(doc);
+                    return SleekAnimation(
+                      delay: Duration(milliseconds: 100 * index),
+                      type: SleekAnimationType.slide,
+                      slideOffset: const Offset(0.05, 0),
+                      child: _buildDocCard(doc),
+                    );
                   },
                 ),
       floatingActionButton: FloatingActionButton(

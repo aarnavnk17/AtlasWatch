@@ -8,6 +8,7 @@ import '../models/risk_level.dart';
 import '../data/city_coordinates.dart';
 import '../services/journey_service.dart';
 import '../services/geocoding_service.dart';
+import '../widgets/sleek_animation.dart';
 
 class JourneyScreen extends StatefulWidget {
   final RiskLevel riskLevel;
@@ -227,8 +228,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                       ),
                       children: [
                         TileLayer(
-                          urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                          subdomains: const ['a', 'b', 'c', 'd'],
+                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.atlaswatch.app',
                           retinaMode: RetinaMode.isHighDensity(context),
                         ),
@@ -270,25 +270,34 @@ class _JourneyScreenState extends State<JourneyScreen> {
             Positioned(
               right: 20,
               top: 20,
-              child: Column(
-                children: [
-                  _mapButton(Icons.add_rounded, () {
-                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
-                  }),
-                  const SizedBox(height: 8),
-                  _mapButton(Icons.remove_rounded, () {
-                    _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
-                  }),
-                  const SizedBox(height: 8),
-                  _mapButton(Icons.my_location_rounded, () => _fitRoute()),
-                ],
+              child: SleekAnimation(
+                delay: const Duration(milliseconds: 300),
+                type: SleekAnimationType.fade,
+                child: Column(
+                  children: [
+                    _mapButton(Icons.add_rounded, () {
+                      _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1);
+                    }),
+                    const SizedBox(height: 8),
+                    _mapButton(Icons.remove_rounded, () {
+                      _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
+                    }),
+                    const SizedBox(height: 8),
+                    _mapButton(Icons.my_location_rounded, () => _fitRoute()),
+                  ],
+                ),
               ),
             ),
 
           // --- OVERLAY INFO PANEL ---
           Align(
             alignment: Alignment.bottomCenter,
-            child: _buildInfoPanel(),
+            child: SleekAnimation(
+              delay: const Duration(milliseconds: 500),
+              type: SleekAnimationType.slide,
+              slideOffset: const Offset(0, 0.2),
+              child: _buildInfoPanel(),
+            ),
           ),
         ],
       ),

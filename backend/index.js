@@ -7,9 +7,37 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const axios = require('axios');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Proxy Geocoding (Bypasses Emulator DNS issues)
+app.get('/geocode', async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: 'Query required' });
+
+  try {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+      params: { q, format: 'json', limit: 1 },
+      headers: { 'User-Agent': 'AtlasWatchProxy/1.0' }
+    });
+    res.json(response.data);
+  } catch (err) {
+    console.error('Geocode Proxy Error:', err.message);
+    res.status(500).json({ error: 'Failed to geocode' });
+  }
+});
+
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Health check for auto-discovery
+app.get('/', (req, res) => res.send('AtlasWatch Backend Active'));
 
 
 

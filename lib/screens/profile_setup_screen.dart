@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/session_service.dart';
+import '../widgets/sleek_animation.dart';
 import 'dashboard_screen.dart';
 import 'login_screen.dart';
 
@@ -117,8 +118,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -162,79 +161,100 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         child: Column(
           children: [
             // --- HEADER SECTION ---
-            _buildHeader(),
+            SleekAnimation(
+              delay: const Duration(milliseconds: 100),
+              type: SleekAnimationType.fade,
+              child: _buildHeader(),
+            ),
             const SizedBox(height: 32),
 
             // --- PERSONAL INFO CARD ---
-            _buildSectionCard(
-              title: 'Personal Information',
-              icon: Icons.person_outline,
-              color: Colors.blue.shade400,
-              children: [
-                _buildTextField(_fullNameController, 'Full Legal Name', Icons.badge_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(_phoneController, 'Contact Number', Icons.phone_outlined, keyboardType: TextInputType.phone),
-                const SizedBox(height: 16),
-                _buildTextField(_nationalityController, 'Nationality', Icons.public_outlined),
-              ],
+            SleekAnimation(
+              delay: const Duration(milliseconds: 300),
+              type: SleekAnimationType.slide,
+              child: _buildSectionCard(
+                title: 'Personal Information',
+                icon: Icons.person_outline,
+                color: Colors.blue.shade400,
+                children: [
+                  _buildTextField(_fullNameController, 'Full Legal Name', Icons.badge_outlined),
+                  const SizedBox(height: 16),
+                  _buildTextField(_phoneController, 'Contact Number', Icons.phone_outlined, keyboardType: TextInputType.phone),
+                  const SizedBox(height: 16),
+                  _buildTextField(_nationalityController, 'Nationality', Icons.public_outlined),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
             // --- IDENTIFICATION CARD ---
-            _buildSectionCard(
-              title: 'Identification Documents',
-              icon: Icons.assignment_ind_outlined,
-              color: Colors.blueGrey.shade300,
-              children: [
-                _buildTextField(_documentTypeController, 'Document Type (e.g., Passport)', Icons.description_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(_passportController, 'Document / ID Number', Icons.numbers_outlined),
-              ],
+            SleekAnimation(
+              delay: const Duration(milliseconds: 500),
+              type: SleekAnimationType.slide,
+              child: _buildSectionCard(
+                title: 'Identification Documents',
+                icon: Icons.assignment_ind_outlined,
+                color: Colors.blueGrey.shade300,
+                children: [
+                  _buildTextField(_documentTypeController, 'Document Type (e.g., Passport)', Icons.description_outlined),
+                  const SizedBox(height: 16),
+                  _buildTextField(_passportController, 'Document / ID Number', Icons.numbers_outlined),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
             // --- MEDICAL INFO CARD (HIGH VISIBILITY) ---
-            _buildSectionCard(
-              title: 'Emergency Medical Data',
-              icon: Icons.medical_services_outlined,
-              color: Colors.red.shade400,
-              isEmergency: true,
-              children: [
-                DropdownButtonFormField<String>(
-                  value: _selectedBloodGroup,
-                  style: const TextStyle(color: Colors.white, fontSize: 15),
-                  dropdownColor: const Color(0xFF2C2C2C),
-                  decoration: _inputDecoration('Blood Group', Icons.bloodtype_outlined, isEmergency: true),
-                  items: _bloodGroups.map((group) {
-                    return DropdownMenuItem(value: group, child: Text(group));
-                  }).toList(),
-                  onChanged: (val) => setState(() => _selectedBloodGroup = val),
-                  iconEnabledColor: Colors.red.shade400,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(_allergiesController, 'Allergies', Icons.warning_amber_rounded, isEmergency: true, maxLines: 2),
-                const SizedBox(height: 16),
-                _buildTextField(_medicalConditionsController, 'Medical Conditions', Icons.health_and_safety_outlined, isEmergency: true, maxLines: 2),
-              ],
+            SleekAnimation(
+              delay: const Duration(milliseconds: 700),
+              type: SleekAnimationType.slide,
+              child: _buildSectionCard(
+                title: 'Emergency Medical Data',
+                icon: Icons.medical_services_outlined,
+                color: Colors.red.shade400,
+                isEmergency: true,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: _selectedBloodGroup,
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
+                    dropdownColor: const Color(0xFF2C2C2C),
+                    decoration: _inputDecoration('Blood Group', Icons.bloodtype_outlined, isEmergency: true),
+                    items: _bloodGroups.map((group) {
+                      return DropdownMenuItem(value: group, child: Text(group));
+                    }).toList(),
+                    onChanged: (val) => setState(() => _selectedBloodGroup = val),
+                    iconEnabledColor: Colors.red.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(_allergiesController, 'Allergies', Icons.warning_amber_rounded, isEmergency: true, maxLines: 2),
+                  const SizedBox(height: 16),
+                  _buildTextField(_medicalConditionsController, 'Medical Conditions', Icons.health_and_safety_outlined, isEmergency: true, maxLines: 2),
+                ],
+              ),
             ),
             const SizedBox(height: 48),
 
             // --- SAVE BUTTON ---
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton(
-                onPressed: _saveProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: widget.isEditMode ? Colors.white : Colors.blue.shade600,
-                  foregroundColor: widget.isEditMode ? Colors.black : Colors.white,
-                  elevation: 4,
-                  shadowColor: Colors.black45,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: Text(
-                  widget.isEditMode ? 'UPDATE ACCOUNT' : 'SAVE & SECURE PROFILE',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+            SleekAnimation(
+              delay: const Duration(milliseconds: 900),
+              slideOffset: const Offset(0, 0.1),
+              type: SleekAnimationType.slide,
+              child: SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.isEditMode ? Colors.white : Colors.blue.shade600,
+                    foregroundColor: widget.isEditMode ? Colors.black : Colors.white,
+                    elevation: 4,
+                    shadowColor: Colors.black45,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: Text(
+                    widget.isEditMode ? 'UPDATE ACCOUNT' : 'SAVE & SECURE PROFILE',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
                 ),
               ),
             ),

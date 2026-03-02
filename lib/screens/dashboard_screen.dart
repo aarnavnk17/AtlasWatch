@@ -6,6 +6,7 @@ import '../services/session_service.dart';
 import '../services/location_service.dart';
 import '../services/crime_service.dart';
 import '../services/risk_service.dart';
+import '../widgets/sleek_animation.dart';
 import 'login_screen.dart';
 import 'profile_setup_screen.dart';
 import 'journey_details_screen.dart';
@@ -44,12 +45,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchUserData() async {
     final profile = await _session.loadProfile();
-    if (profile != null && profile['fullName'] != null) {
-      if (mounted) {
-        setState(() {
-          _userName = profile['fullName'];
-        });
-      }
+    final email = await _session.getEmail();
+    
+    String displayName = "User";
+    
+    // 1. Try fullName from profile
+    if (profile != null && profile['fullName'] != null && profile['fullName'].toString().trim().isNotEmpty) {
+      displayName = profile['fullName'];
+    } 
+    // 2. Fallback to Email Prefix (e.g. 'aarnav' from 'aarnav@example.com')
+    else if (email != null && email.contains('@')) {
+      displayName = email.split('@')[0];
+      // Capitalize first letter
+      displayName = displayName[0].toUpperCase() + displayName.substring(1);
+    }
+
+    if (mounted) {
+      setState(() {
+        _userName = displayName;
+      });
     }
   }
 
@@ -177,64 +191,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- HEADER ---
-              _buildHeader(),
+              SleekAnimation(
+                type: SleekAnimationType.fade,
+                delay: const Duration(milliseconds: 100),
+                child: _buildHeader(),
+              ),
               const SizedBox(height: 32),
 
               // --- RISK & LOCATION HERO CARD ---
-              _buildRiskHeroCard(),
+              SleekAnimation(
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0.05, 0),
+                delay: const Duration(milliseconds: 300),
+                child: _buildRiskHeroCard(),
+              ),
               const SizedBox(height: 24),
 
               // --- TOOLS GRID ---
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildToolCard(
-                      'Vault',
-                      Icons.folder_shared_outlined,
-                      Colors.blue.shade400,
-                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentVaultScreen())),
+              SleekAnimation(
+                type: SleekAnimationType.fade,
+                delay: const Duration(milliseconds: 500),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildToolCard(
+                        'Vault',
+                        Icons.folder_shared_outlined,
+                        Colors.blue.shade400,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentVaultScreen())),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildToolCard(
-                      'Contacts',
-                      Icons.people_alt_outlined,
-                      Colors.orange.shade400,
-                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactManagerScreen())),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildToolCard(
+                        'Contacts',
+                        Icons.people_alt_outlined,
+                        Colors.orange.shade400,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactManagerScreen())),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
 
               // --- START JOURNEY BUTTON ---
-              _buildLargeActionButton(
-                'START JOURNEY',
-                'Activate live safety tracking',
-                Icons.navigation_outlined,
-                Colors.blue.shade600,
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => JourneyDetailsScreen(riskLevel: _riskLevel)),
+              SleekAnimation(
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0, 0.1),
+                delay: const Duration(milliseconds: 700),
+                child: _buildLargeActionButton(
+                  'START JOURNEY',
+                  'Activate live safety tracking',
+                  Icons.navigation_outlined,
+                  Colors.blue.shade600,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => JourneyDetailsScreen(riskLevel: _riskLevel)),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
 
               // --- SOS BUTTON ---
-              _buildLargeActionButton(
-                'SOS EMERGENCY',
-                'Instant alert to contacts & services',
-                Icons.warning_amber_rounded,
-                const Color(0xFFE53935),
-                () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SosScreen())),
-                isHighImpact: true,
+              SleekAnimation(
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0, 0.1),
+                delay: const Duration(milliseconds: 900),
+                child: _buildLargeActionButton(
+                  'SOS EMERGENCY',
+                  'Instant alert to contacts & services',
+                  Icons.warning_amber_rounded,
+                  const Color(0xFFE53935),
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SosScreen())),
+                  isHighImpact: true,
+                ),
               ),
 
               const SizedBox(height: 32),
 
               // --- DEV TOOLS ---
-              _buildDevTools(),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 1100),
+                child: _buildDevTools(),
+              ),
               
               const SizedBox(height: 32),
             ],
@@ -248,23 +288,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _userName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.5,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$_userName,',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            const Text(
-              'Stay safe today.',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-          ],
+              const Text(
+                'Stay safe today.',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ],
+          ),
         ),
         Row(
           children: [

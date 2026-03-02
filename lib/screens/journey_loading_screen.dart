@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/risk_level.dart';
+import '../widgets/sleek_animation.dart';
 import 'journey_screen.dart';
 
 class JourneyLoadingScreen extends StatefulWidget {
@@ -53,31 +54,41 @@ class _JourneyLoadingScreenState extends State<JourneyLoadingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.05),
-                shape: BoxShape.circle,
-              ),
-              child: const CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            SleekAnimation(
+              type: SleekAnimationType.scale,
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: const CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                ),
               ),
             ),
             const SizedBox(height: 48),
-            const Text(
-              'SECURING YOUR ROUTE',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
+            const SleekAnimation(
+              delay: Duration(milliseconds: 300),
+              child: Column(
+                children: [
+                  Text(
+                    'SECURING YOUR ROUTE',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'Analyzing live safety data and risk factors...',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Analyzing live safety data and risk factors...',
-              style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
           ],
         ),

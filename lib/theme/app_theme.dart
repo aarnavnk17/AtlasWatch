@@ -80,6 +80,14 @@ class AppTheme {
       ),
     ),
 
+    // ✅ SLEEK TRANSITIONS
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
+
     // ✅ FIXED HERE
     cardTheme: CardThemeData(
       elevation: 1,

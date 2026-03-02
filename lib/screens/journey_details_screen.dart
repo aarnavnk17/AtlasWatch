@@ -4,7 +4,9 @@ import 'package:latlong2/latlong.dart';
 import '../models/risk_level.dart';
 import '../services/location_service.dart';
 import '../services/geocoding_service.dart';
+import '../widgets/sleek_animation.dart';
 import 'journey_loading_screen.dart';
+import 'dart:async';
 
 class JourneyDetailsScreen extends StatefulWidget {
   final RiskLevel riskLevel;
@@ -26,6 +28,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
   final MapController _mapController = MapController();
   LatLng? _previewLatLng;
   final GeocodingService _geocoder = GeocodingService();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -36,6 +39,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _startController.dispose();
     _endController.dispose();
     _referenceController.dispose();
@@ -43,9 +47,11 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
   }
 
   void _onDestinationChanged() {
-    // Simple debounce/delay to avoid too many geocoding calls
-    if (_endController.text.length < 3) return;
-    _updatePreview(_endController.text);
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (_endController.text.length < 3) return;
+      _updatePreview(_endController.text);
+    });
   }
 
   Future<void> _updatePreview(String query) async {
@@ -95,96 +101,113 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Plan Your Trip',
-                  style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Set your destination and travel details for live monitoring.',
-                  style: TextStyle(color: Colors.grey, fontSize: 15),
+                const SleekAnimation(
+                  delay: Duration(milliseconds: 200),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Plan Your Trip',
+                        style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Set your destination and travel details for live monitoring.',
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 32),
 
                 // --- FORM CARD ---
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: Colors.white.withOpacity(0.03)),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildFieldLabel('Starting Point'),
-                      TextFormField(
-                        controller: _startController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Current Location', Icons.my_location_rounded),
-                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 20),
+                SleekAnimation(
+                  delay: const Duration(milliseconds: 400),
+                  type: SleekAnimationType.slide,
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: Colors.white.withOpacity(0.03)),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildFieldLabel('Starting Point'),
+                        TextFormField(
+                          controller: _startController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('Current Location', Icons.my_location_rounded),
+                          validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 20),
 
-                      _buildFieldLabel('Destination'),
-                      TextFormField(
-                        controller: _endController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Where are you going?', Icons.location_on_outlined),
-                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      const SizedBox(height: 20),
+                        _buildFieldLabel('Destination'),
+                        TextFormField(
+                          controller: _endController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('Where are you going?', Icons.location_on_outlined),
+                          validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 20),
 
-                      // --- MAP PREVIEW ---
-                      _buildMapPreview(),
-                      const SizedBox(height: 24),
+                        // --- MAP PREVIEW ---
+                        _buildMapPreview(),
+                        const SizedBox(height: 24),
 
-                      _buildFieldLabel('Travel Mode'),
-                      const SizedBox(height: 12),
-                      _buildModeSelector(),
-                      const SizedBox(height: 24),
+                        _buildFieldLabel('Travel Mode'),
+                        const SizedBox(height: 12),
+                        _buildModeSelector(),
+                        const SizedBox(height: 24),
 
-                      _buildFieldLabel('Vehicle / Number'),
-                      TextFormField(
-                        controller: _referenceController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('e.g. MH01-AB-1234 or AI 101', Icons.directions_bus_filled_outlined),
-                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                    ],
+                        _buildFieldLabel('Vehicle / Number'),
+                        TextFormField(
+                          controller: _referenceController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('e.g. MH01-AB-1234 or AI 101', Icons.directions_bus_filled_outlined),
+                          validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 48),
 
                 // --- ACTION BUTTON ---
-                SizedBox(
-                  width: double.infinity,
-                  height: 64,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (!_formKey.currentState!.validate()) return;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => JourneyLoadingScreen(
-                            riskLevel: widget.riskLevel,
-                            startLocation: _startController.text,
-                            endLocation: _endController.text,
-                            mode: _mode,
-                            reference: _referenceController.text,
+                SleekAnimation(
+                  delay: const Duration(milliseconds: 600),
+                  type: SleekAnimationType.slide,
+                  slideOffset: const Offset(0, 0.1),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 64,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (!_formKey.currentState!.validate()) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => JourneyLoadingScreen(
+                              riskLevel: widget.riskLevel,
+                              startLocation: _startController.text,
+                              endLocation: _endController.text,
+                              mode: _mode,
+                              reference: _referenceController.text,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade600,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                    ),
-                    child: const Text(
-                      'START TRACKING',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue.shade600,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'START TRACKING',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                      ),
                     ),
                   ),
                 ),
@@ -288,8 +311,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                subdomains: const ['a', 'b', 'c', 'd'],
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.atlaswatch.app',
                 retinaMode: RetinaMode.isHighDensity(context),
               ),

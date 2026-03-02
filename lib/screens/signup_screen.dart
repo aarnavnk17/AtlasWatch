@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/sleek_animation.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -95,7 +96,6 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,101 +113,128 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Join AtlasWatch',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
+              const SleekAnimation(
+                delay: Duration(milliseconds: 200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Join AtlasWatch',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Protect yourself and your loved ones worldwide.',
+                      style: TextStyle(color: Colors.grey, fontSize: 15),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Protect yourself and your loved ones worldwide.',
-                style: TextStyle(color: Colors.grey, fontSize: 15),
               ),
               const SizedBox(height: 48),
 
               // --- EMAIL FIELD ---
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Email Address', Icons.email_outlined),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 400),
+                type: SleekAnimationType.slide,
+                child: TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration('Email Address', Icons.email_outlined),
+                ),
               ),
               const SizedBox(height: 20),
 
               // --- PASSWORD FIELD ---
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Secure Password', Icons.lock_outline_rounded),
-                onChanged: (val) => setState(() => _password = val),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 500),
+                type: SleekAnimationType.slide,
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration('Secure Password', Icons.lock_outline_rounded),
+                  onChanged: (val) => setState(() => _password = val),
+                ),
               ),
               const SizedBox(height: 16),
 
               // --- PASSWORD REQUIREMENTS ---
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Security Requirements',
-                      style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                    ),
-                    const SizedBox(height: 12),
-                    _requirementRow('At least 8 characters', _hasMinLength),
-                    _requirementRow('One uppercase letter', _hasUpperCase),
-                    _requirementRow('One numeric digit', _hasNumber),
-                    _requirementRow('One special character', _hasSpecial),
-                  ],
+              SleekAnimation(
+                delay: const Duration(milliseconds: 600),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Security Requirements',
+                        style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      ),
+                      const SizedBox(height: 12),
+                      _requirementRow('At least 8 characters', _hasMinLength),
+                      _requirementRow('One uppercase letter', _hasUpperCase),
+                      _requirementRow('One numeric digit', _hasNumber),
+                      _requirementRow('One special character', _hasSpecial),
+                    ],
+                  ),
                 ),
               ),
 
               const SizedBox(height: 48),
 
               // --- SUBMIT BUTTON ---
-              SizedBox(
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _loading || !_isPasswordValid ? null : _handleSignup,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade600,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade900,
-                    disabledForegroundColor: Colors.grey.shade700,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
-                    shadowColor: Colors.black45,
+              SleekAnimation(
+                delay: const Duration(milliseconds: 800),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0, 0.1),
+                child: SizedBox(
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: _loading || !_isPasswordValid ? null : _handleSignup,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade600,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade900,
+                      disabledForegroundColor: Colors.grey.shade700,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                      shadowColor: Colors.black45,
+                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Text(
+                            'CREATE ACCOUNT',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                          ),
                   ),
-                  child: _loading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          'CREATE ACCOUNT',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
-                        ),
                 ),
               ),
               const SizedBox(height: 24),
               
-              Center(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    "Already have an account? Sign In",
-                    style: TextStyle(color: Colors.blue.shade400, fontWeight: FontWeight.w600),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 1000),
+                child: Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Already have an account? Sign In",
+                      style: TextStyle(color: Colors.blue.shade400, fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ),

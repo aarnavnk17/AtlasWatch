@@ -1,11 +1,6 @@
-// ===============================
-// SOS ACTIVE SCREEN
-// ===============================
-// Shown after SOS is confirmed
-// ===============================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import '../widgets/sleek_animation.dart';
 
 class SosActiveScreen extends StatefulWidget {
   final bool playSiren;
@@ -54,69 +49,89 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // --- ACTIVE PULSE ---
-              Container(
-                padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 200),
+                type: SleekAnimationType.scale,
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(40),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.2),
+                    color: Colors.red.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.emergency_rounded, size: 100, color: Colors.redAccent),
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.emergency_rounded, size: 100, color: Colors.redAccent),
+                  ),
                 ),
               ),
               const SizedBox(height: 48),
 
-              const Text(
-                'SOS IS ACTIVE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
+              const SleekAnimation(
+                delay: Duration(milliseconds: 400),
+                child: Column(
+                  children: [
+                    Text(
+                      'SOS IS ACTIVE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Your live location and medical profile\nare being shared with your emergency\ncontacts and local authorities.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Your live location and medical profile\nare being shared with your emergency\ncontacts and local authorities.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
               ),
 
               const Spacer(),
 
               // --- SAFE BUTTON ---
-              SizedBox(
-                width: double.infinity,
-                height: 64,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 10,
-                    shadowColor: Colors.black45,
-                  ),
-                  onPressed: () {
-                    if (widget.playSiren) {
-                      FlutterRingtonePlayer().stop();
-                    }
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                  },
-                  child: const Text(
-                    "I'M NOW SAFE",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1),
-                  ),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 600),
+                type: SleekAnimationType.slide,
+                slideOffset: const Offset(0, 0.1),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 64,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 10,
+                          shadowColor: Colors.black45,
+                        ),
+                        onPressed: () {
+                          if (widget.playSiren) {
+                            FlutterRingtonePlayer().stop();
+                          }
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
+                        child: const Text(
+                          "I'M NOW SAFE",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Press only after securing yourself.',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Press only after securing yourself.',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],
           ),

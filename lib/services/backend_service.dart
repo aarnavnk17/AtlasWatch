@@ -23,9 +23,9 @@ class BackendService {
     // Android Emulator - tries standard loopback first
     if (Platform.isAndroid) {
       list.addAll([
-        'http://10.0.2.2:3000', // Android emulator → host machine
-        'http://10.0.2.2:8000',
+        'http://10.0.2.2:3000', // Reverted to default port as per user request
         'http://10.0.2.2:5000',
+        'http://10.0.2.2:8000',
       ]);
     }
 
@@ -99,6 +99,7 @@ class BackendService {
   }) async {
     final base = await _findWorkingBase();
     final uri = Uri.parse(base + path);
+    debugPrint('HTTP POST: $uri');
     return http.post(uri, headers: headers, body: body).timeout(_requestTimeout);
   }
 

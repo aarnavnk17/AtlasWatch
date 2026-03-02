@@ -3,6 +3,7 @@ import 'services/session_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/profile_setup_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(const AtlasWatchApp());
@@ -15,24 +16,9 @@ class AtlasWatchApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      // ✅ FORCE DARK MODE
       themeMode: ThemeMode.dark,
-
-      // Dark theme configuration
-      theme: ThemeData.dark(useMaterial3: true),
-
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.teal,
-          secondary: Colors.tealAccent,
-        ),
-        scaffoldBackgroundColor: const Color(0xFF0F1115),
-        cardColor: const Color(0xFF1A1D24),
-      ),
-
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: const EntryGate(),
     );
   }

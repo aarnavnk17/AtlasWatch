@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../services/contact_service.dart';
+import '../widgets/sleek_animation.dart';
 
 class ContactManagerScreen extends StatefulWidget {
   const ContactManagerScreen({super.key});
@@ -58,7 +59,6 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +86,12 @@ class _ContactManagerScreenState extends State<ContactManagerScreen> {
                   itemCount: _contacts.length,
                   itemBuilder: (context, index) {
                     final contact = _contacts[index];
-                    return _buildContactCard(contact);
+                    return SleekAnimation(
+                      delay: Duration(milliseconds: 100 * index),
+                      type: SleekAnimationType.slide,
+                      slideOffset: const Offset(0.05, 0),
+                      child: _buildContactCard(contact),
+                    );
                   },
                 ),
       floatingActionButton: FloatingActionButton(
