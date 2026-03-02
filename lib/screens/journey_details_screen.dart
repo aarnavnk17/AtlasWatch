@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geocoding/geocoding.dart';
 import '../models/risk_level.dart';
 import '../services/location_service.dart';
+import '../services/geocoding_service.dart';
 import 'journey_loading_screen.dart';
 
 class JourneyDetailsScreen extends StatefulWidget {
@@ -25,6 +25,7 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
 
   final MapController _mapController = MapController();
   LatLng? _previewLatLng;
+  final GeocodingService _geocoder = GeocodingService();
 
   @override
   void initState() {
@@ -49,16 +50,13 @@ class _JourneyDetailsScreenState extends State<JourneyDetailsScreen> {
 
   Future<void> _updatePreview(String query) async {
     try {
-      List<Location> locations = await locationFromAddress(query);
-      if (locations.isNotEmpty) {
-        final loc = LatLng(locations.first.latitude, locations.first.longitude);
-        if (mounted) {
-          setState(() => _previewLatLng = loc);
-          _mapController.move(loc, 16.5); // High zoom for building names
-        }
+      final loc = await _geocoder.resolveLocation(query);
+      if (loc != null && mounted) {
+        setState(() => _previewLatLng = loc);
+        _mapController.move(loc, 16.5); // High zoom for building names
       }
     } catch (e) {
-      // Quietly ignore geocoding errors while typing
+      debugPrint('Geocoding preview error: $e');
     }
   }
 

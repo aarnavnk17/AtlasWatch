@@ -15,9 +15,22 @@ app.use(express.json());
 
 // MongoDB connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/atlaswatch';
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  family: 4 // Force IPv4 (fixes Node.js 18+ DNS issues on some networks)
+})
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    if (err.name === 'MongooseServerSelectionError') {
+      console.error('\n🛠️  Troubleshooting Help:');
+      console.error('1. Your current IP might not be whitelisted. Your WHITELIST in MongoDB Atlas should be 0.0.0.0/0 for all-access.');
+      console.error('2. Ensure your password/username are correct in the .env file.');
+      console.error('3. Check if your ISP or local firewall blocks port 27017.');
+      console.log('\nTopology details:', JSON.stringify(err.reason, null, 2));
+    }
+  });
 
 // Mongoose models
 const userSchema = new mongoose.Schema({

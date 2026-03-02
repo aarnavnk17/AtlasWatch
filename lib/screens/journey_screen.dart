@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../models/risk_level.dart';
 import '../data/city_coordinates.dart';
 import '../services/journey_service.dart';
+import '../services/geocoding_service.dart';
 
 class JourneyScreen extends StatefulWidget {
   final RiskLevel riskLevel;
@@ -36,6 +37,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
   LatLng? _endLatLng;
   bool _loadingRoute = true;
   String? _errorMessage;
+  final GeocodingService _geocoder = GeocodingService();
   bool _isMapReady = false;
 
   @override
@@ -69,27 +71,13 @@ class _JourneyScreenState extends State<JourneyScreen> {
       start = CityCoordinates.get(widget.startLocation);
       end = CityCoordinates.get(widget.endLocation);
 
-      // 2. Fallback to API Geocoding
+      // 2. Fallback to Robust Geocoding Service (Native + Web Fallback)
       if (start == null) {
-        try {
-          List<Location> locations = await locationFromAddress(widget.startLocation);
-          if (locations.isNotEmpty) {
-            start = LatLng(locations.first.latitude, locations.first.longitude);
-          }
-        } catch (e) {
-            debugPrint("Geocoding failed for start: $e");
-        }
+        start = await _geocoder.resolveLocation(widget.startLocation);
       }
 
       if (end == null) {
-         try {
-          List<Location> locations = await locationFromAddress(widget.endLocation);
-          if (locations.isNotEmpty) {
-            end = LatLng(locations.first.latitude, locations.first.longitude);
-          }
-         } catch (e) {
-             debugPrint("Geocoding failed for end: $e");
-         }
+        end = await _geocoder.resolveLocation(widget.endLocation);
       }
 
       if (start != null && end != null) {
