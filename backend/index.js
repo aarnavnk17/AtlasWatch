@@ -128,6 +128,7 @@ const locationSchema = new mongoose.Schema({
   email: { type: String, required: true, index: true },
   lat: { type: Number, required: true },
   lng: { type: Number, required: true },
+  address: String,
   accuracy: Number,
   timestamp: { type: Date, default: Date.now }
 }, { timestamps: true });
@@ -443,15 +444,29 @@ app.delete('/contacts/:id', async (req, res) => {
 // { email, lat, lng, accuracy, timestamp }
 // ============================
 app.post('/location', async (req, res) => {
-  const { email, lat, lng, accuracy, timestamp, riskLevel } = req.body;
+  const { email, lat, lng, address, accuracy, timestamp, riskLevel } = req.body;
   if (!email || lat == null || lng == null) return res.status(400).json({ success: false, message: 'Missing fields' });
 
   try {
-    const loc = await Location.create({ email, lat, lng, accuracy, timestamp: timestamp ? new Date(timestamp) : undefined });
-    // Keep last location and explicitly store riskLevel on user document
-    await User.updateOne({ email }, { $set: { lastLocation: { lat, lng, accuracy, riskLevel, timestamp: loc.timestamp } } });
+    // Update existing location or create if not found - ensuring only one record per user
+    const loc = await Location.findOneAndUpdate(
+      { email },
+      {
+        lat,
+        lng,
+        address,
+        accuracy,
+        timestamp: timestamp ? new Date(timestamp) : new Date()
+      },
+      { upsert: true, new: true }
+    );
+
+    // Also update the lastLocation on the User document for fast retrieval
+    await User.updateOne({ email }, { $set: { lastLocation: { lat, lng, address, accuracy, riskLevel, timestamp: loc.timestamp } } });
+
     return res.json({ success: true, id: loc._id });
   } catch (err) {
+    console.error('Location Update Error:', err.message);
     return res.status(500).json({ success: false, message: err.message });
   }
 });

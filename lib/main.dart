@@ -5,7 +5,14 @@ import 'screens/dashboard_screen.dart';
 import 'screens/profile_setup_screen.dart';
 import 'theme/app_theme.dart';
 
+import 'services/location_tracking_service.dart';
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Start the periodic location tracking service (5-min intervals)
+  LocationTrackingService().startTracking();
+  
   runApp(const AtlasWatchApp());
 }
 
