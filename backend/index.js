@@ -46,7 +46,7 @@ const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/atlaswat
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  family: 4 // Force IPv4 (fixes Node.js 18+ DNS issues on some networks)
+  family: 4
 })
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => {
@@ -146,9 +146,8 @@ const crimeStatSchema = new mongoose.Schema({
 
 const CrimeStat = mongoose.model('CrimeStat', crimeStatSchema);
 
-// ============================
 // CRIME STATS ENDPOINT (DATABASE-POWERED)
-// ============================
+
 app.get('/crime-stats', async (req, res) => {
   const { area } = req.query;
   if (!area) return res.json({ score: 0 });
@@ -156,15 +155,15 @@ app.get('/crime-stats', async (req, res) => {
   const searchArea = area.toLowerCase();
 
   try {
-    // 1. Try to find a direct city match
+
     let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + searchArea + '$', 'i') } }).lean();
 
-    // 2. If no city match, search for cities that contain the search string
+
     if (!stat) {
       stat = await CrimeStat.findOne({ city: { $regex: new RegExp(searchArea, 'i') } }).lean();
     }
 
-    // 3. If still no match, search within the 'areas' Map of all cities
+
     let score = 0;
     let found = false;
 
@@ -172,9 +171,7 @@ app.get('/crime-stats', async (req, res) => {
       score = stat.score;
       found = true;
     } else {
-      // Deep search in all cities for a sub-area match
-      // Note: This is a bit expensive, but works for the current scale. 
-      // In a larger DB, we'd restructure the 'areas' into their own documents.
+
       const allStats = await CrimeStat.find({}).lean();
       for (const cityStat of allStats) {
         if (cityStat.areas) {
@@ -190,7 +187,6 @@ app.get('/crime-stats', async (req, res) => {
       }
     }
 
-    // Default random-ish score if not found
     if (!found) {
       let hash = 0;
       for (let i = 0; i < searchArea.length; i++) {
@@ -199,7 +195,6 @@ app.get('/crime-stats', async (req, res) => {
       score = Math.abs(hash % 500);
     }
 
-    // Normalize Score for frontend (standard 0-300 range)
     let finalScore = score;
     if (score > 300) {
       finalScore = Math.floor(score / 20);
@@ -217,10 +212,6 @@ app.get('/crime-stats', async (req, res) => {
   }
 });
 
-// ============================
-// CREATE TABLES
-// ============================
-// No SQL table creation needed; Mongoose will manage collections.
 
 // ============================
 // REGISTER
