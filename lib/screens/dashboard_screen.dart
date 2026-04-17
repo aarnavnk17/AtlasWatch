@@ -12,7 +12,11 @@ import 'profile_setup_screen.dart';
 import 'journey_details_screen.dart';
 import 'sos_screen.dart';
 import 'contact_manager_screen.dart';
+<<<<<<< Updated upstream
 import 'document_vault_screen.dart';
+=======
+import '../data/city_coordinates.dart';
+>>>>>>> Stashed changes
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -42,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchUserData();
     _fetchLocationAndRisk();
   }
+<<<<<<< Updated upstream
 
   Future<void> _fetchUserData() async {
     final profile = await _session.loadProfile();
@@ -94,15 +99,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final crimeService = CrimeService();
     final riskService = RiskService();
+=======
+  
+ Future<void> _simulateLocation(String customLocation) async {
+    if (customLocation.isEmpty) return;
+
+    setState(() {
+        _loadingLocation = true;
+        _locationName = customLocation;
+    });
+
+    // 1. Resolve coordinates — local lookup first, geocoding as fallback
+    LatLng? resolved = CityCoordinates.get(customLocation);
+
+    if (resolved == null) {
+        try {
+            List<Location> locations = await locationFromAddress(customLocation);
+            if (locations.isNotEmpty) {
+                resolved = LatLng(locations.first.latitude, locations.first.longitude);
+            }
+        } catch (e) {
+            debugPrint('Error geocoding custom location: $e');
+        }
+    }
+
+    if (resolved != null) {
+        setState(() {
+            _currentLatLng = resolved!;
+        });
+    } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not find coordinates for: $customLocation')),
+        );
+    }
+
+    // 2. Fetch Risk Score
+    final crimeService = CrimeService();
+    final riskService = RiskService();
+
+>>>>>>> Stashed changes
     final score = await crimeService.fetchCrimeScore(customLocation);
 
     if (!mounted) return;
 
     setState(() {
+<<<<<<< Updated upstream
       _riskLevel = riskService.calculateRisk(score);
       _loadingLocation = false;
     });
   }
+=======
+        _riskLevel = riskService.calculateRisk(score);
+        _loadingLocation = false;
+    });
+}
+>>>>>>> Stashed changes
 
   Future<void> _fetchLocationAndRisk() async {
     final locationService = LocationService();
@@ -235,6 +287,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 24),
 
+<<<<<<< Updated upstream
               // --- START JOURNEY BUTTON ---
               SleekAnimation(
                 type: SleekAnimationType.slide,
@@ -248,6 +301,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => JourneyDetailsScreen(riskLevel: _riskLevel)),
+=======
+            const SizedBox(height: 20),
+
+            // 📍 Location
+            _loadingLocation
+                ? const LinearProgressIndicator()
+                : Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _locationName == null
+                                  ? 'Location unavailable'
+                                  : 'Current Location: $_locationName',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () {
+                              setState(() {
+                                _loadingLocation = true;
+                              });
+                              _fetchLocationAndRisk();
+                            },
+                            tooltip: 'Refresh Location',
+                          ),
+                        ],
+                      ),
+                      if (_locationName != null)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Lat: ${_currentLatLng.latitude.toStringAsFixed(4)}, Lng: ${_currentLatLng.longitude.toStringAsFixed(4)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+            const SizedBox(height: 10),
+
+            // 🧪 Manual Override (For Testing)
+            ExpansionTile(
+              title: const Text('Enter Location', style: TextStyle(fontSize: 12)),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _locationController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter city (e.g. New York)',
+                            isDense: true,
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () => _simulateLocation(_locationController.text),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                        ),
+                        child: const Text('Simulate'),
+                      ),
+                    ],
+>>>>>>> Stashed changes
                   ),
                 ),
               ),

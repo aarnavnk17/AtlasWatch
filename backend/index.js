@@ -135,6 +135,7 @@ const locationSchema = new mongoose.Schema({
 
 const Location = mongoose.model('Location', locationSchema);
 
+<<<<<<< Updated upstream
 const crimeStatSchema = new mongoose.Schema({
   state: { type: String, required: true, index: true },
   city: { type: String, required: true, index: true },
@@ -149,6 +150,335 @@ const CrimeStat = mongoose.model('CrimeStat', crimeStatSchema);
 // CRIME STATS ENDPOINT (DATABASE-POWERED)
 
 app.get('/crime-stats', async (req, res) => {
+=======
+const geofenceSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  type: { type: String, enum: ['safe', 'restricted', 'high-risk'], default: 'restricted' },
+  center: {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true }
+  },
+  radius: { type: Number, required: true }, // meters
+  created_by: { type: String, default: 'admin' }
+}, { timestamps: true });
+
+const sosAlertSchema = new mongoose.Schema({
+  email: { type: String, required: true, index: true },
+  lat: { type: Number },
+  lng: { type: Number },
+  trigger: { type: String, enum: ['manual', 'inactivity', 'geofence', 'anomaly'], default: 'manual' },
+  status: { type: String, enum: ['active', 'resolved'], default: 'active' },
+  notes: { type: String },
+  timestamp: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const anomalyLogSchema = new mongoose.Schema({
+  email: { type: String, required: true, index: true },
+  lat: { type: Number },
+  lng: { type: Number },
+  risk_level: { type: String, enum: ['low', 'medium', 'high'], default: 'low' },
+  anomaly_flag: { type: Boolean, default: false },
+  reason: { type: String },
+  details: { type: Object },
+  timestamp: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const Geofence = mongoose.model('Geofence', geofenceSchema);
+const SosAlert = mongoose.model('SosAlert', sosAlertSchema);
+const AnomalyLog = mongoose.model('AnomalyLog', anomalyLogSchema);
+
+// ============================
+// HAVERSINE HELPER
+// ============================
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Earth radius in metres
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// ============================
+// AI / ANOMALY DETECTION ENGINE
+// ============================
+// FR-3.2.13: Analyze movement behaviour using rule-based logic
+// FR-3.2.14: Detect abnormal conditions such as prolonged inactivity
+// FR-3.2.15: Assign a dynamic risk level based on predefined rules
+// FR-3.2.10: Detect entry into geo-fenced zones
+// FR-3.2.11/12: Generate alerts for high-risk zone entry
+async function analyzeRisk(email, lat, lng) {
+  const result = {
+    risk_level: 'low',
+    anomaly_flag: false,
+    reason: 'Normal movement detected',
+    details: {}
+  };
+
+  // --- Rule 1: Geofence check ---
+  const geofences = await Geofence.find({}).lean();
+  for (const fence of geofences) {
+    const dist = haversineDistance(lat, lng, fence.center.lat, fence.center.lng);
+    if (dist <= fence.radius) {
+      result.details.geofence = { name: fence.name, type: fence.type, distanceMeters: Math.round(dist) };
+      if (fence.type === 'high-risk') {
+        result.risk_level = 'high';
+        result.anomaly_flag = true;
+        result.reason = `Entered high-risk zone: ${fence.name}`;
+        return result; // Highest severity — return immediately
+      }
+      if (fence.type === 'restricted') {
+        result.risk_level = 'medium';
+        result.anomaly_flag = true;
+        result.reason = `Entered restricted zone: ${fence.name}`;
+      }
+    }
+  }
+
+  // --- Rule 2: Inactivity detection ---
+  // Look at location history in the last 10 minutes
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const recentLocations = await Location.find({
+    email,
+    timestamp: { $gte: tenMinutesAgo }
+  }).sort({ timestamp: 1 }).lean();
+
+  if (recentLocations.length >= 2) {
+    const oldest = recentLocations[0];
+    const newest = recentLocations[recentLocations.length - 1];
+    const totalMovement = haversineDistance(oldest.lat, oldest.lng, newest.lat, newest.lng);
+    const elapsedMinutes = (new Date(newest.timestamp) - new Date(oldest.timestamp)) / 60000;
+
+    result.details.movement = {
+      totalDistanceMeters: Math.round(totalMovement),
+      elapsedMinutes: Math.round(elapsedMinutes)
+    };
+
+    // If user moved less than 30m over 10 minutes → inactivity
+    if (totalMovement < 30 && elapsedMinutes >= 8) {
+      result.anomaly_flag = true;
+      result.reason = 'Prolonged inactivity detected (no significant movement in 10 minutes)';
+      // Escalate risk level if not already high
+      if (result.risk_level === 'low') result.risk_level = 'medium';
+    }
+
+    // --- Rule 3: Sudden speed spike / erratic movement ---
+    if (recentLocations.length >= 3) {
+      let maxSpeed = 0;
+      for (let i = 1; i < recentLocations.length; i++) {
+        const prev = recentLocations[i - 1];
+        const curr = recentLocations[i];
+        const d = haversineDistance(prev.lat, prev.lng, curr.lat, curr.lng);
+        const t = (new Date(curr.timestamp) - new Date(prev.timestamp)) / 1000; // seconds
+        if (t > 0) {
+          const speedMs = d / t;
+          if (speedMs > maxSpeed) maxSpeed = speedMs;
+        }
+      }
+      const speedKph = maxSpeed * 3.6;
+      result.details.maxSpeedKph = Math.round(speedKph);
+
+      // Walking > 10 kph is unusual for a tourist on foot
+      if (speedKph > 10 && speedKph < 80) {
+        result.anomaly_flag = true;
+        result.reason = `Unusual movement speed detected (${Math.round(speedKph)} kph)`;
+        if (result.risk_level === 'low') result.risk_level = 'medium';
+      }
+    }
+  }
+
+  return result;
+}
+
+// POST /analyze — main AI endpoint called after each location update
+// Body: { email, lat, lng }
+app.post('/analyze', async (req, res) => {
+  const { email, lat, lng } = req.body;
+  if (!email || lat == null || lng == null) {
+    return res.status(400).json({ success: false, message: 'email, lat, lng required' });
+  }
+
+  try {
+    const analysis = await analyzeRisk(email, lat, lng);
+
+    // Persist anomaly log for admin dashboard (FR-3.2.21)
+    await AnomalyLog.create({
+      email,
+      lat,
+      lng,
+      risk_level: analysis.risk_level,
+      anomaly_flag: analysis.anomaly_flag,
+      reason: analysis.reason,
+      details: analysis.details
+    });
+
+    // FR-3.2.8 / FR-3.2.15: Push live risk level into user's lastLocation
+    // so the admin dashboard always shows the AI-computed safety status.
+    await User.updateOne({ email }, {
+      $set: {
+        'lastLocation.riskLevel': analysis.risk_level,
+        'lastLocation.anomalyFlag': analysis.anomaly_flag,
+        'lastLocation.anomalyReason': analysis.reason,
+        'lastLocation.lat': lat,
+        'lastLocation.lng': lng,
+        'lastLocation.timestamp': new Date()
+      }
+    });
+
+    return res.json({ success: true, ...analysis });
+  } catch (err) {
+    console.error('Analyze error:', err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================
+// GEOFENCE ENDPOINTS
+// FR-3.2.9: Define geo-fenced zones
+// FR-3.2.20: Allow management of geo-fence boundaries
+// ============================
+
+app.get('/geofences', async (req, res) => {
+  try {
+    const fences = await Geofence.find({}).lean();
+    return res.json({ success: true, geofences: fences });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/geofences', async (req, res) => {
+  const { name, type, center, radius } = req.body;
+  if (!name || !center || !center.lat || !center.lng || !radius) {
+    return res.status(400).json({ success: false, message: 'name, center (lat/lng), and radius required' });
+  }
+
+  try {
+    const fence = await Geofence.create({ name, type: type || 'restricted', center, radius });
+    return res.json({ success: true, geofence: fence });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/geofences/:id', async (req, res) => {
+  try {
+    await Geofence.deleteOne({ _id: req.params.id });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PUT /geofences/:id — update an existing geo-fence zone (FR-3.2.20)
+app.put("/geofences/:id", async (req, res) => {
+  const { name, type, center, radius } = req.body;
+  try {
+    const updated = await Geofence.findByIdAndUpdate(
+      req.params.id,
+      { $set: { name, type, center, radius } },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ success: false, message: "Zone not found" });
+    return res.json({ success: true, geofence: updated });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// GET /admin/anomaly-summary — aggregated anomaly stats per user (FR-3.2.21)
+app.get("/admin/anomaly-summary", async (req, res) => {
+  try {
+    const summary = await AnomalyLog.aggregate([
+      { $group: {
+          _id: "$email",
+          totalEvents: { $sum: 1 },
+          anomalyCount: { $sum: { $cond: ["$anomaly_flag", 1, 0] } },
+          highRiskCount: { $sum: { $cond: [{ $eq: ["$risk_level", "high"] }, 1, 0] } },
+          lastEvent: { $max: "$timestamp" },
+          lastReason: { $last: "$reason" },
+          lastRiskLevel: { $last: "$risk_level" }
+      }},
+      { $sort: { anomalyCount: -1 } }
+    ]);
+    return res.json({ success: true, summary });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+// ============================
+// SOS ALERT ENDPOINTS
+// FR-3.2.16: Panic alert mechanism
+// FR-3.2.17: Transmit last known location during emergency
+// FR-3.2.18: Log emergency alerts with timestamps
+// ============================
+
+app.post('/sos', async (req, res) => {
+  const { email, lat, lng, trigger, notes } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  try {
+    const alert = await SosAlert.create({
+      email,
+      lat: lat ?? null,
+      lng: lng ?? null,
+      trigger: trigger || 'manual',
+      notes: notes || null
+    });
+
+    // Also update user's lastLocation with SOS flag
+    if (lat != null && lng != null) {
+      await User.updateOne({ email }, {
+        $set: { lastLocation: { lat, lng, sos: true, timestamp: new Date() } }
+      });
+    }
+
+    console.log(`🚨 SOS ALERT from ${email} at [${lat}, ${lng}] — trigger: ${trigger || 'manual'}`);
+    return res.json({ success: true, alert_id: alert._id });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/sos/alerts', async (req, res) => {
+  try {
+    const alerts = await SosAlert.find({}).sort({ timestamp: -1 }).limit(100).lean();
+    return res.json({ success: true, alerts });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.post('/sos/:id/resolve', async (req, res) => {
+  try {
+    await SosAlert.updateOne({ _id: req.params.id }, { $set: { status: 'resolved' } });
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// GET /anomaly-log — admin view of all anomaly detections
+app.get('/anomaly-log', async (req, res) => {
+  const { email } = req.query;
+  const query = email ? { email } : {};
+  try {
+    const logs = await AnomalyLog.find(query).sort({ timestamp: -1 }).limit(200).lean();
+    return res.json({ success: true, logs });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ============================
+// CRIME STATS ENDPOINT
+// ============================
+app.get('/crime-stats', (req, res) => {
+>>>>>>> Stashed changes
   const { area } = req.query;
   if (!area) return res.json({ score: 0 });
 

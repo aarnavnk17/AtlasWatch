@@ -1,10 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'sos_active_screen.dart';
 import '../services/contact_service.dart';
+<<<<<<< Updated upstream
 import '../services/session_service.dart';
 import '../widgets/sleek_animation.dart';
+=======
+import '../services/backend_service.dart';
+import '../services/session_service.dart';
+>>>>>>> Stashed changes
 
 class SosScreen extends StatefulWidget {
   const SosScreen({super.key});
@@ -26,14 +32,43 @@ class _SosScreenState extends State<SosScreen> {
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
 
+<<<<<<< Updated upstream
       // 2. Fetch Contacts & Profile
+=======
+      // 2. Log SOS to backend (FR-3.2.16/17/18)
+      try {
+        final session = SessionService();
+        final email = await session.getEmail();
+        if (email != null) {
+          await BackendService.post(
+            '/sos',
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'email': email,
+              'lat': position.latitude,
+              'lng': position.longitude,
+              'trigger': 'manual',
+            }),
+          );
+        }
+      } catch (e) {
+        debugPrint('SOS backend log failed: $e');
+      }
+
+      // 3. Fetch Contacts
+>>>>>>> Stashed changes
       final contactService = ContactService();
       final sessionService = SessionService();
       
       final contacts = await contactService.getContacts();
       final profile = await sessionService.loadProfile();
       
+<<<<<<< Updated upstream
       // 3. Prepare SMS
+=======
+      // 4. Prepare SMS
+      // Recipients: All emergency contacts (Testing mode: Police removed)
+>>>>>>> Stashed changes
       List<String> recipients = [];
       for (var c in contacts) {
         recipients.add(c.phone);
@@ -71,7 +106,7 @@ class _SosScreenState extends State<SosScreen> {
         },
       );
 
-      // 4. Launch SMS App
+      // 5. Launch SMS App
       if (await canLaunchUrl(smsLaunchUri)) {
         await launchUrl(smsLaunchUri);
       } else {
@@ -83,7 +118,7 @@ class _SosScreenState extends State<SosScreen> {
          }
       }
 
-      // 4. Navigate to Active Screen
+      // 5. Navigate to Active Screen
       if (mounted) {
         Navigator.pushReplacement(
           context,
