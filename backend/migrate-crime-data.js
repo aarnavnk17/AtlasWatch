@@ -10,6 +10,11 @@ const crimeStatSchema = new mongoose.Schema({
     risk: String,
     score: Number,
     areas: mongoose.Schema.Types.Mixed,
+    location: {
+        type: { type: String, enum: ['Point'], default: 'Point' },
+        coordinates: { type: [Number], index: '2dsphere' }
+    },
+    radius: { type: Number, default: 1000 },
     lastUpdated: { type: Date, default: Date.now }
 });
 
@@ -34,7 +39,12 @@ async function migrate() {
                     city: cityName,
                     risk: stats.risk,
                     score: stats.score,
-                    areas: stats.areas
+                    areas: stats.areas,
+                    location: {
+                        type: 'Point',
+                        coordinates: [stats.lng || 0, stats.lat || 0]
+                    },
+                    radius: stats.radius || 1000
                 });
                 count++;
             }

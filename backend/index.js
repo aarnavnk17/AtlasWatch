@@ -43,21 +43,10 @@ app.get('/', (req, res) => res.send('AtlasWatch Backend Active'));
 
 // MongoDB connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/atlaswatch';
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  family: 4
-})
+mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
-    if (err.name === 'MongooseServerSelectionError') {
-      console.error('\n🛠️  Troubleshooting Help:');
-      console.error('1. Your current IP might not be whitelisted. Your WHITELIST in MongoDB Atlas should be 0.0.0.0/0 for all-access.');
-      console.error('2. Ensure your password/username are correct in the .env file.');
-      console.error('3. Check if your ISP or local firewall blocks port 27017.');
-      console.log('\nTopology details:', JSON.stringify(err.reason, null, 2));
-    }
   });
 
 // Mongoose models
@@ -141,10 +130,37 @@ const crimeStatSchema = new mongoose.Schema({
   risk: String,
   score: Number,
   areas: mongoose.Schema.Types.Mixed,
+  location: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], index: '2dsphere' } // [longitude, latitude]
+  },
+  radius: { type: Number, default: 1000 }, // in meters (1km)
   lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 const CrimeStat = mongoose.model('CrimeStat', crimeStatSchema);
+
+// NEW: SEARCH CRIME DATA BY COORDINATES
+app.get('/crime-stats/proximity', async (req, res) => {
+  const { lat, lng, distance = 5000 } = req.query; // Default 5km radius search
+  if (!lat || !lng) return res.status(400).json({ success: false, message: 'Latitude and Longitude required' });
+
+  try {
+    const stats = await CrimeStat.find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: parseInt(distance)
+        }
+      }
+    }).lean();
+
+    res.json({ success: true, count: stats.length, data: stats });
+  } catch (err) {
+    console.error('Proximity Search Error:', err);
+    res.status(500).json({ success: false, message: 'Database error' });
+  }
+});
 
 // CRIME STATS ENDPOINT (DATABASE-POWERED)
 

@@ -94,7 +94,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final crimeService = CrimeService();
     final riskService = RiskService();
-    final score = await crimeService.fetchCrimeScore(customLocation);
+    
+    // Use coordinate-based score if possible
+    int score = 0;
+    if (_currentLatLng.latitude != 0) {
+      score = await crimeService.fetchCrimeScoreByLocation(_currentLatLng.latitude, _currentLatLng.longitude);
+    } 
+    
+    // Fallback to name-based score if coord search yielded nothing
+    if (score == 0) {
+      score = await crimeService.fetchCrimeScore(customLocation);
+    }
 
     if (!mounted) return;
 
@@ -119,17 +129,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _locationName = result.address;
         });
 
-        if (result.address != null) {
-          final crimeService = CrimeService();
-          final riskService = RiskService();
-          final score = await crimeService.fetchCrimeScore(result.address!);
-
-          if (!mounted) return;
-
-          setState(() {
-            _riskLevel = riskService.calculateRisk(score);
-          });
+        final crimeService = CrimeService();
+        final riskService = RiskService();
+        
+        // Priority 1: Use actual GPS coordinates
+        int score = await crimeService.fetchCrimeScoreByLocation(newLatLng.latitude, newLatLng.longitude);
+        
+        // Priority 2: Fallback to address name
+        if (score == 0 && result.address != null) {
+          score = await crimeService.fetchCrimeScore(result.address!);
         }
+
+        if (!mounted) return;
+
+        setState(() {
+          _riskLevel = riskService.calculateRisk(score);
+        });
       } else {
         setState(() {
           _loadingLocation = false;
