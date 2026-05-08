@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 import '../models/risk_level.dart';
+import '../data/city_coordinates.dart';
 import '../services/session_service.dart';
 import '../services/location_service.dart';
 import '../services/crime_service.dart';
 import '../services/risk_service.dart';
 import '../widgets/sleek_animation.dart';
+import '../widgets/ai_risk_monitor.dart';
 import 'login_screen.dart';
 import 'profile_setup_screen.dart';
 import 'journey_details_screen.dart';
 import 'sos_screen.dart';
 import 'contact_manager_screen.dart';
-<<<<<<< Updated upstream
 import 'document_vault_screen.dart';
-=======
-import '../data/city_coordinates.dart';
->>>>>>> Stashed changes
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,7 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final SessionService _session = SessionService();
   RiskLevel _riskLevel = RiskLevel.low;
   String? _locationName;
-  String _userName = "User";
+  String _userName = 'User';
   bool _loadingLocation = true;
   LatLng _currentLatLng = const LatLng(0, 0);
   final TextEditingController _locationController = TextEditingController();
@@ -46,30 +44,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchUserData();
     _fetchLocationAndRisk();
   }
-<<<<<<< Updated upstream
 
   Future<void> _fetchUserData() async {
     final profile = await _session.loadProfile();
     final email = await _session.getEmail();
-    
-    String displayName = "User";
-    
-    // 1. Try fullName from profile
-    if (profile != null && profile['fullName'] != null && profile['fullName'].toString().trim().isNotEmpty) {
+
+    String displayName = 'User';
+    if (profile != null &&
+        profile['fullName'] != null &&
+        profile['fullName'].toString().trim().isNotEmpty) {
       displayName = profile['fullName'];
-    } 
-    // 2. Fallback to Email Prefix (e.g. 'aarnav' from 'aarnav@example.com')
-    else if (email != null && email.contains('@')) {
-      displayName = email.split('@')[0];
-      // Capitalize first letter
-      displayName = displayName[0].toUpperCase() + displayName.substring(1);
+    } else if (email != null && email.contains('@')) {
+      final prefix = email.split('@')[0];
+      displayName = prefix[0].toUpperCase() + prefix.substring(1);
     }
 
-    if (mounted) {
-      setState(() {
-        _userName = displayName;
-      });
-    }
+    if (mounted) setState(() => _userName = displayName);
   }
 
   Future<void> _simulateLocation(String customLocation) async {
@@ -80,107 +70,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _locationName = customLocation;
     });
 
-    try {
-      List<Location> locations = await locationFromAddress(customLocation);
-      if (locations.isNotEmpty) {
-        final loc = locations.first;
-        final newLatLng = LatLng(loc.latitude, loc.longitude);
-        setState(() {
-          _currentLatLng = newLatLng;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error geocoding custom location: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not find location: $customLocation')),
-      );
-    }
-
-    final crimeService = CrimeService();
-    final riskService = RiskService();
-=======
-  
- Future<void> _simulateLocation(String customLocation) async {
-    if (customLocation.isEmpty) return;
-
-    setState(() {
-        _loadingLocation = true;
-        _locationName = customLocation;
-    });
-
-    // 1. Resolve coordinates — local lookup first, geocoding as fallback
+    // Local lookup first, then geocoding
     LatLng? resolved = CityCoordinates.get(customLocation);
-
     if (resolved == null) {
-        try {
-            List<Location> locations = await locationFromAddress(customLocation);
-            if (locations.isNotEmpty) {
-                resolved = LatLng(locations.first.latitude, locations.first.longitude);
-            }
-        } catch (e) {
-            debugPrint('Error geocoding custom location: $e');
+      try {
+        final locs = await locationFromAddress(customLocation);
+        if (locs.isNotEmpty) {
+          resolved = LatLng(locs.first.latitude, locs.first.longitude);
         }
-    }
-
-    if (resolved != null) {
-        setState(() {
-            _currentLatLng = resolved!;
-        });
-    } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+      } catch (e) {
+        debugPrint('Geocoding error: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Could not find coordinates for: $customLocation')),
-        );
+          );
+        }
+      }
     }
 
-    // 2. Fetch Risk Score
-    final crimeService = CrimeService();
-    final riskService = RiskService();
+    if (resolved != null) setState(() => _currentLatLng = resolved!);
 
->>>>>>> Stashed changes
-    final score = await crimeService.fetchCrimeScore(customLocation);
-
+    final score = await CrimeService().fetchCrimeScore(customLocation);
     if (!mounted) return;
-
     setState(() {
-<<<<<<< Updated upstream
-      _riskLevel = riskService.calculateRisk(score);
+      _riskLevel = RiskService().calculateRisk(score);
       _loadingLocation = false;
     });
   }
-=======
-        _riskLevel = riskService.calculateRisk(score);
-        _loadingLocation = false;
-    });
-}
->>>>>>> Stashed changes
 
   Future<void> _fetchLocationAndRisk() async {
-    final locationService = LocationService();
     try {
-      final result = await locationService.fetchCurrentLocation();
-
+      final result = await LocationService().fetchCurrentLocation();
       if (!mounted) return;
 
       if (result != null) {
-        final newLatLng = LatLng(result.position.latitude, result.position.longitude);
         setState(() {
           _loadingLocation = false;
-          _currentLatLng = newLatLng;
+          _currentLatLng = LatLng(result.position.latitude, result.position.longitude);
           _locationName = result.address;
         });
 
         if (result.address != null) {
-          final crimeService = CrimeService();
-          final riskService = RiskService();
-          final score = await crimeService.fetchCrimeScore(result.address!);
-
+          final score = await CrimeService().fetchCrimeScore(result.address!);
           if (!mounted) return;
-
-          setState(() {
-            _riskLevel = riskService.calculateRisk(score);
-          });
+          setState(() => _riskLevel = RiskService().calculateRisk(score));
         }
       } else {
         setState(() {
@@ -189,35 +122,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error fetching location: $e');
+      debugPrint('Location error: $e');
       if (mounted) {
         setState(() {
           _loadingLocation = false;
           _locationName = 'Location unavailable';
         });
       }
-    }
-  }
-
-  Color get _riskColor {
-    switch (_riskLevel) {
-      case RiskLevel.low:
-        return const Color(0xFF4CAF50);
-      case RiskLevel.medium:
-        return const Color(0xFFFF9800);
-      case RiskLevel.high:
-        return const Color(0xFFE53935);
-    }
-  }
-
-  String get _riskLabel {
-    switch (_riskLevel) {
-      case RiskLevel.low:
-        return 'LOW RISK';
-      case RiskLevel.medium:
-        return 'MEDIUM RISK';
-      case RiskLevel.high:
-        return 'HIGH RISK';
     }
   }
 
@@ -231,6 +142,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Color get _riskColor {
+    switch (_riskLevel) {
+      case RiskLevel.low:    return const Color(0xFF4CAF50);
+      case RiskLevel.medium: return const Color(0xFFFF9800);
+      case RiskLevel.high:   return const Color(0xFFE53935);
+    }
+  }
+
+  String get _riskLabel {
+    switch (_riskLevel) {
+      case RiskLevel.low:    return 'LOW RISK';
+      case RiskLevel.medium: return 'MEDIUM RISK';
+      case RiskLevel.high:   return 'HIGH RISK';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +169,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER ---
+
+              // ── Header ──────────────────────────────────────
               SleekAnimation(
                 type: SleekAnimationType.fade,
                 delay: const Duration(milliseconds: 100),
@@ -250,45 +178,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 32),
 
-              // --- RISK & LOCATION HERO CARD ---
+              // ── Risk & Location Hero Card ────────────────────
               SleekAnimation(
                 type: SleekAnimationType.slide,
                 slideOffset: const Offset(0.05, 0),
                 delay: const Duration(milliseconds: 300),
                 child: _buildRiskHeroCard(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // --- TOOLS GRID ---
+              // ── AI Danger Score Card (tappable → breakdown) ──
+              if (_locationName != null && _locationName!.isNotEmpty)
+                SleekAnimation(
+                  type: SleekAnimationType.slide,
+                  slideOffset: const Offset(0, 0.05),
+                  delay: const Duration(milliseconds: 400),
+                  child: AiRiskMonitor(
+                    location : _locationName!,
+                    latitude : _currentLatLng.latitude  != 0 ? _currentLatLng.latitude  : null,
+                    longitude: _currentLatLng.longitude != 0 ? _currentLatLng.longitude : null,
+                    onAutoSosTrigger: (int score, String reason) {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => SosScreen(
+                          autoTrigger  : true,
+                          aiDangerScore: score,
+                          aiReason     : reason,
+                        ),
+                      ));
+                    },
+                  ),
+                ),
+              const SizedBox(height: 20),
+
+              // ── Tools Grid ───────────────────────────────────
               SleekAnimation(
                 type: SleekAnimationType.fade,
                 delay: const Duration(milliseconds: 500),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: _buildToolCard(
-                        'Vault',
-                        Icons.folder_shared_outlined,
-                        Colors.blue.shade400,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentVaultScreen())),
-                      ),
-                    ),
+                    Expanded(child: _buildToolCard(
+                      'Vault', Icons.folder_shared_outlined, Colors.blue.shade400,
+                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DocumentVaultScreen())),
+                    )),
                     const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildToolCard(
-                        'Contacts',
-                        Icons.people_alt_outlined,
-                        Colors.orange.shade400,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactManagerScreen())),
-                      ),
-                    ),
+                    Expanded(child: _buildToolCard(
+                      'Contacts', Icons.people_alt_outlined, Colors.orange.shade400,
+                      () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactManagerScreen())),
+                    )),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
 
-<<<<<<< Updated upstream
-              // --- START JOURNEY BUTTON ---
+              // ── Start Journey ────────────────────────────────
               SleekAnimation(
                 type: SleekAnimationType.slide,
                 slideOffset: const Offset(0, 0.1),
@@ -298,91 +240,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'Activate live safety tracking',
                   Icons.navigation_outlined,
                   Colors.blue.shade600,
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => JourneyDetailsScreen(riskLevel: _riskLevel)),
-=======
-            const SizedBox(height: 20),
-
-            // 📍 Location
-            _loadingLocation
-                ? const LinearProgressIndicator()
-                : Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _locationName == null
-                                  ? 'Location unavailable'
-                                  : 'Current Location: $_locationName',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: () {
-                              setState(() {
-                                _loadingLocation = true;
-                              });
-                              _fetchLocationAndRisk();
-                            },
-                            tooltip: 'Refresh Location',
-                          ),
-                        ],
-                      ),
-                      if (_locationName != null)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Lat: ${_currentLatLng.latitude.toStringAsFixed(4)}, Lng: ${_currentLatLng.longitude.toStringAsFixed(4)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-
-            const SizedBox(height: 10),
-
-            // 🧪 Manual Override (For Testing)
-            ExpansionTile(
-              title: const Text('Enter Location', style: TextStyle(fontSize: 12)),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _locationController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter city (e.g. New York)',
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _simulateLocation(_locationController.text),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber,
-                            foregroundColor: Colors.black,
-                        ),
-                        child: const Text('Simulate'),
-                      ),
-                    ],
->>>>>>> Stashed changes
-                  ),
+                  () => Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => JourneyDetailsScreen(riskLevel: _riskLevel),
+                  )),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // --- SOS BUTTON ---
+              // ── SOS ──────────────────────────────────────────
               SleekAnimation(
                 type: SleekAnimationType.slide,
                 slideOffset: const Offset(0, 0.1),
@@ -396,15 +261,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   isHighImpact: true,
                 ),
               ),
-
               const SizedBox(height: 32),
 
-              // --- DEV TOOLS ---
+              // ── Dev Tools ────────────────────────────────────
               SleekAnimation(
                 delay: const Duration(milliseconds: 1100),
                 child: _buildDevTools(),
               ),
-              
               const SizedBox(height: 32),
             ],
           ),
@@ -421,19 +284,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '$_userName,',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const Text(
-                'Stay safe today.',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
+              Text('$_userName,',
+                  style: const TextStyle(color: Colors.white, fontSize: 28,
+                      fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+              const Text('Stay safe today.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16)),
             ],
           ),
         ),
@@ -446,17 +301,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isEditMode: true))),
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (_) => const ProfileSetupScreen(isEditMode: true))),
               child: Container(
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
                 ),
-                child: CircleAvatar(
+                child: const CircleAvatar(
                   radius: 26,
-                  backgroundColor: const Color(0xFF1E1E1E),
-                  child: const Icon(Icons.person, color: Colors.blue, size: 28),
+                  backgroundColor: Color(0xFF1E1E1E),
+                  child: Icon(Icons.person, color: Colors.blue, size: 28),
                 ),
               ),
             ),
@@ -473,13 +329,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2),
+            blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,15 +338,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Safety Status',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14),
-              ),
+              const Text('Safety Status',
+                  style: TextStyle(color: Colors.grey,
+                      fontWeight: FontWeight.bold, fontSize: 14)),
               if (_loadingLocation)
-                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                const SizedBox(width: 16, height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2))
               else
                 IconButton(
-                  onPressed: _fetchLocationAndRisk,
+                  onPressed: () {
+                    setState(() => _loadingLocation = true);
+                    _fetchLocationAndRisk();
+                  },
                   icon: const Icon(Icons.refresh, size: 20, color: Colors.grey),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -506,38 +360,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                _riskLabel,
-                style: TextStyle(
-                  color: _riskColor,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
-                ),
-              ),
+              Text(_riskLabel,
+                  style: TextStyle(color: _riskColor, fontSize: 24,
+                      fontWeight: FontWeight.w900, letterSpacing: -1)),
               const SizedBox(width: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: _riskColor),
-                ),
+                child: Container(width: 8, height: 8,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: _riskColor)),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            _locationName ?? 'Detecting location...',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
+          Text(_locationName ?? 'Detecting location...',
+              maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 18,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 24),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: _riskLevel == RiskLevel.low ? 0.2 : (_riskLevel == RiskLevel.medium ? 0.5 : 0.9),
+              value: _riskLevel == RiskLevel.low ? 0.2
+                  : (_riskLevel == RiskLevel.medium ? 0.5 : 0.9),
               backgroundColor: Colors.white.withOpacity(0.05),
               color: _riskColor,
               minHeight: 6,
@@ -565,23 +409,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: BoxDecoration(color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: color, size: 22),
             ),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+            Text(label, style: const TextStyle(color: Colors.white,
+                fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLargeActionButton(String title, String subtitle, IconData icon, Color color, VoidCallback onTap, {bool isHighImpact = false}) {
+  Widget _buildLargeActionButton(String title, String subtitle, IconData icon,
+      Color color, VoidCallback onTap, {bool isHighImpact = false}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -607,22 +448,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
+                  Text(title, style: const TextStyle(color: Colors.white,
+                      fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                  Text(subtitle, style: TextStyle(
                       color: isHighImpact ? Colors.white.withOpacity(0.8) : Colors.grey,
-                      fontSize: 13,
-                    ),
-                  ),
+                      fontSize: 13)),
                 ],
               ),
             ),
@@ -636,11 +466,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildDevTools() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E).withValues(alpha: 0.5),
+        color: const Color(0xFF1E1E1E).withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: ExpansionTile(
-        title: const Text('Developer Options', style: TextStyle(color: Colors.grey, fontSize: 13)),
+        title: const Text('Developer Options',
+            style: TextStyle(color: Colors.grey, fontSize: 13)),
         iconColor: Colors.grey,
         collapsedIconColor: Colors.grey,
         children: [
@@ -657,10 +488,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         decoration: InputDecoration(
                           hintText: 'Enter city (testing)',
                           hintStyle: const TextStyle(color: Colors.grey),
-                          isDense: true,
-                          filled: true,
+                          isDense: true, filled: true,
                           fillColor: const Color(0xFF2C2C2C),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none),
                         ),
                       ),
                     ),
@@ -670,7 +502,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.amber,
                         foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Text('Simulate'),
                     ),
@@ -680,7 +513,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextButton.icon(
                   onPressed: _logout,
                   icon: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
-                  label: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+                  label: const Text('Sign Out',
+                      style: TextStyle(color: Colors.redAccent)),
                 ),
               ],
             ),
@@ -690,4 +524,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
-

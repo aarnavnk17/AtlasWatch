@@ -4,8 +4,15 @@ import '../widgets/sleek_animation.dart';
 
 class SosActiveScreen extends StatefulWidget {
   final bool playSiren;
+  final bool aiTriggered;
+  final int? aiDangerScore;
 
-  const SosActiveScreen({super.key, this.playSiren = false});
+  const SosActiveScreen({
+    super.key,
+    this.playSiren = false,
+    this.aiTriggered = false,
+    this.aiDangerScore,
+  });
 
   @override
   State<SosActiveScreen> createState() => _SosActiveScreenState();
@@ -70,11 +77,11 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
               ),
               const SizedBox(height: 48),
 
-              const SleekAnimation(
-                delay: Duration(milliseconds: 400),
+              SleekAnimation(
+                delay: const Duration(milliseconds: 400),
                 child: Column(
                   children: [
-                    Text(
+                    const Text(
                       'SOS IS ACTIVE',
                       style: TextStyle(
                         color: Colors.white,
@@ -83,8 +90,37 @@ class _SosActiveScreenState extends State<SosActiveScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 16),
-                    Text(
+                    if (widget.aiTriggered) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_awesome, color: Colors.redAccent, size: 14),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.aiDangerScore != null
+                                  ? 'AI AUTO-TRIGGERED · SCORE ${widget.aiDangerScore}/100'
+                                  : 'AI AUTO-TRIGGERED',
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    const Text(
                       'Your live location and medical profile\nare being shared with your emergency\ncontacts and local authorities.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
