@@ -169,15 +169,19 @@ app.get('/crime-stats', async (req, res) => {
   if (!area) return res.json({ score: 0 });
 
   const searchArea = area.toLowerCase().trim();
-  const cityPart = searchArea.split(',')[0].trim(); // Get 'Gurugram' from 'Gurugram, Haryana, India'
+  const cityPart = searchArea.split(',')[0].trim();
+  console.log(`🔍 Crime Search Request: "${area}" -> City Part: "${cityPart}"`);
 
   try {
     // 1. Try exact match on city
     let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart + '$', 'i') } }).lean();
 
-    // 2. Try partial match if first attempt fails
-    if (!stat) {
+    if (stat) {
+      console.log(`✅ Match found: ${stat.city} (Score: ${stat.score})`);
+    } else {
+      console.log(`❓ No exact match for "${cityPart}", trying partial...`);
       stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart, 'i') } }).lean();
+      if (stat) console.log(`✅ Partial match found: ${stat.city} (Score: ${stat.score})`);
     }
 
 

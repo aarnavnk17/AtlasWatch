@@ -16,19 +16,21 @@ class CrimeService {
   Future<int> fetchCrimeScoreByLocation(double lat, double lng) async {
     try {
       final response = await BackendService.get(
-        '/crime-stats/proximity?lat=$lat&lng=$lng&distance=5000', // 5km radius
+        '/crime-stats/proximity?lat=$lat&lng=$lng&distance=20000', // Increased to 20km
       );
       
       if (response.statusCode != 200) return 0;
       final data = json.decode(response.body);
       
       if (data['success'] == true && (data['data'] as List).isNotEmpty) {
-        // Use the closest matching crime zone
         final closest = data['data'][0];
-        return (closest['score'] ?? 0);
+        final score = closest['score'] ?? 0;
+        print('📍 Proximity Match: ${closest['city']} | Score: $score');
+        return score;
       }
       return 0;
     } catch (e) {
+      print('❌ Proximity Fetch Error: $e');
       return 0;
     }
   }
@@ -37,8 +39,9 @@ class CrimeService {
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.body);
-        // Use the 'score' field directly from the backend
-        return data['score'] ?? 0;
+        final score = data['score'] ?? 0;
+        print('🏙️ Name-based Match Score: $score');
+        return score;
       } catch (e) {
         return 0;
       }
