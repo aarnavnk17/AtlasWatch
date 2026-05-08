@@ -34,14 +34,15 @@ class CrimeService {
   }
 
   int _processResponse(dynamic response) {
-    if (response.statusCode != 200) return 0;
-    final data = json.decode(response.body);
-
-    final theft = data['theft'] ?? 0;
-    final assault = data['assault'] ?? 0;
-    final fraud = data['fraud'] ?? 0;
-
-    // Weighted scoring model
-    return theft + (assault * 2) + fraud;
+    if (response.statusCode == 200) {
+      try {
+        final data = json.decode(response.body);
+        // Use the 'score' field directly from the backend
+        return data['score'] ?? 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+    return 0;
   }
 }
