@@ -142,6 +142,11 @@ const crimeStatSchema = new mongoose.Schema({
   risk: String,
   score: Number,
   areas: mongoose.Schema.Types.Mixed,
+  location: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], index: '2dsphere' } // [longitude, latitude]
+  },
+  radius: { type: Number, default: 1000 }, // in meters (1km)
   lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
@@ -279,6 +284,29 @@ async function analyzeRisk(email, lat, lng) {
 
   return result;
 }
+// NEW: SEARCH CRIME DATA BY COORDINATES
+app.get('/crime-stats/proximity', async (req, res) => {
+  const { lat, lng, distance = 5000 } = req.query; // Default 5km radius search
+  if (!lat || !lng) return res.status(400).json({ success: false, message: 'Latitude and Longitude required' });
+
+  try {
+    const stats = await CrimeStat.find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: parseInt(distance)
+        }
+      }
+    }).lean();
+
+    res.json({ success: true, count: stats.length, data: stats });
+  } catch (err) {
+    console.error('Proximity Search Error:', err);
+    res.status(500).json({ success: false, message: 'Database error' });
+  }
+});
+
+// CRIME STATS ENDPOINT (DATABASE-POWERED)
 
 // POST /analyze
 app.post('/analyze', async (req, res) => {
@@ -452,12 +480,22 @@ app.get('/crime-stats', async (req, res) => {
   const { area } = req.query;
   if (!area) return res.json({ score: 0 });
 
-  const searchArea = area.toLowerCase();
+  const searchArea = area.toLowerCase().trim();
+  const cityPart = searchArea.split(',')[0].trim();
+  console.log(`🔍 Crime Search Request: "${area}" -> City Part: "${cityPart}"`);
 
   try {
-    let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + searchArea + '$', 'i') } }).lean();
-    if (!stat)
-      stat = await CrimeStat.findOne({ city: { $regex: new RegExp(searchArea, 'i') } }).lean();
+    // 1. Try exact match on city
+    let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart + '$', 'i') } }).lean();
+
+    if (stat) {
+      console.log(`✅ Match found: ${stat.city} (Score: ${stat.score})`);
+    } else {
+      console.log(`❓ No exact match for "${cityPart}", trying partial...`);
+      stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart, 'i') } }).lean();
+      if (stat) console.log(`✅ Partial match found: ${stat.city} (Score: ${stat.score})`);
+    }
+
 
     let score = 0;
     let found = false;
