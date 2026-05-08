@@ -168,15 +168,16 @@ app.get('/crime-stats', async (req, res) => {
   const { area } = req.query;
   if (!area) return res.json({ score: 0 });
 
-  const searchArea = area.toLowerCase();
+  const searchArea = area.toLowerCase().trim();
+  const cityPart = searchArea.split(',')[0].trim(); // Get 'Gurugram' from 'Gurugram, Haryana, India'
 
   try {
+    // 1. Try exact match on city
+    let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart + '$', 'i') } }).lean();
 
-    let stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + searchArea + '$', 'i') } }).lean();
-
-
+    // 2. Try partial match if first attempt fails
     if (!stat) {
-      stat = await CrimeStat.findOne({ city: { $regex: new RegExp(searchArea, 'i') } }).lean();
+      stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityPart, 'i') } }).lean();
     }
 
 
