@@ -75,8 +75,8 @@ class RiskService {
   // offline / demo fallback (used by CrimeService flow)
   // -------------------------------------------------------
   RiskLevel calculateRisk(int score) {
-    if (score < 100) return RiskLevel.low;
-    if (score < 200) return RiskLevel.medium;
+    if (score <= 4000) return RiskLevel.low;
+    if (score <= 8000) return RiskLevel.medium;
     return RiskLevel.high;
   }
 

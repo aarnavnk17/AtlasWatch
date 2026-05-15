@@ -77,12 +77,15 @@ function crimeScoreForLocation(locationName) {
   return normaliseCrimeBase(raw);
 }
 
-function locationProfileScore(locationName) {
+function locationProfileScore(locationName, cityScore = 35) {
   const loc = locationName.toLowerCase();
-  for (const a of HIGH_RISK_AREAS)   if (loc.includes(a)) return 80;
-  for (const a of MEDIUM_RISK_AREAS) if (loc.includes(a)) return 55;
-  for (const a of LOW_RISK_AREAS)    if (loc.includes(a)) return 15;
-  return 40;
+  let modifier = 0;
+  for (const a of HIGH_RISK_AREAS)   if (loc.includes(a)) { modifier = 20; break; }
+  for (const a of MEDIUM_RISK_AREAS) if (loc.includes(a)) { modifier = 10; break; }
+  for (const a of LOW_RISK_AREAS)    if (loc.includes(a)) { modifier = -15; break; }
+  
+  // Start from city baseline (or default 35) and add/sub modifier
+  return Math.min(100, Math.max(5, cityScore + modifier));
 }
 
 function temporalRiskScore(hour, dayOfWeek) {
@@ -101,6 +104,18 @@ function temporalRiskScore(hour, dayOfWeek) {
 function reportVelocityScore(reportCount) {
   if (reportCount <= 0) return 0;
   return Math.min(100, Math.round(30 * Math.log(reportCount + 1)));
+}
+
+function transportRiskScore(mode) {
+  if (!mode) return 0;
+  const m = mode.toLowerCase();
+  if (m.includes('walk') || m.includes('foot')) return 35;
+  if (m.includes('bike') || m.includes('cycle')) return 28;
+  if (m.includes('auto') || m.includes('rickshaw')) return 20;
+  if (m.includes('bus')) return 15;
+  if (m.includes('car') || m.includes('taxi')) return 8;
+  if (m.includes('metro') || m.includes('train')) return 5;
+  return 12;
 }
 
 function behaviouralScore(flags = {}) {
@@ -125,11 +140,14 @@ function buildExplanation(score, bd, reportCount, locationName, hour) {
   if (bd.crimeBase >= 50)       factors.push(`High historical crime rate in ${displayName}`);
   else if (bd.crimeBase >= 30)  factors.push(`Moderate crime data for ${displayName}`);
   else if (bd.crimeBase > 0)    factors.push(`Low crime baseline for ${displayName}`);
-  if (bd.locationProfile >= 70) factors.push('Known high-risk neighbourhood or area');
-  else if (bd.locationProfile >= 50) factors.push('Public transit or market area (pick-pocket risk)');
+  
+  if (bd.locationProfile > bd.crimeBase) factors.push('Specific area type increases risk level');
+  else if (bd.locationProfile < bd.crimeBase) factors.push('Specific area type provides safety buffer');
+  
   if (bd.temporalRisk >= 70)    factors.push(`High-risk time of night (${hour}:00)`);
   if (reportCount > 0)          factors.push(`${reportCount} recent incident report${reportCount>1?'s':''} nearby`);
   if (bd.behavioural >= 30)     factors.push('Unusual movement or geofence breach detected');
+  if (bd.transportRisk >= 25)   factors.push('High vulnerability due to travel mode (walking/cycling)');
 
   const severity = severityLabel(score);
   let reasoning;
@@ -143,35 +161,43 @@ function buildExplanation(score, bd, reportCount, locationName, hour) {
 }
 
 function assess(input) {
-  const { crimeRawScore=0, locationName='Unknown', reportCount=0, flags={}, now=new Date() } = input;
+  const { crimeRawScore=0, locationName='Unknown', reportCount=0, transportMode=null, flags={}, now=new Date() } = input;
   const hour = now.getHours(), dayOfWeek = now.getDay();
 
-  // Always derive crime base from our city dataset using the location name.
-  // crimeRawScore from MongoDB CrimeStat is used as a boost if available,
-  // but city dataset is the reliable primary source.
   const datasetScore = crimeScoreForLocation(locationName);
   const mongoScore   = normaliseCrimeBase(crimeRawScore);
-  const l1 = datasetScore > 0 ? datasetScore : mongoScore; // prefer dataset
-  const l2 = locationProfileScore(locationName);
+  const l1 = datasetScore > 0 ? datasetScore : (mongoScore > 0 ? mongoScore : 35); 
+  const l2 = locationProfileScore(locationName, l1);
   const l3 = temporalRiskScore(hour, dayOfWeek);
   const l4 = reportVelocityScore(reportCount);
   const l5 = behaviouralScore(flags);
+  const l6 = transportRiskScore(transportMode);
 
   // Use additive modifier approach: crime is base (0-65), modifiers push toward 100
   const timeMod      = Math.round((l3 - 15) * 0.25);   // neutral=15, late night adds ~+13
   const reportMod    = Math.round(l4 * 0.20);           // report velocity adds up to +20
   const behaviourMod = Math.round(l5 * 0.08);
-  const locMod       = l2 >= 70 ? 12 : l2 >= 50 ? 6 : l2 <= 20 ? -5 : 0; // location type nudge
-  const final_score  = Math.min(100, Math.max(5, l1 + timeMod + reportMod + behaviourMod + locMod));
+  const locMod       = l2 >= 70 ? 12 : l2 >= 50 ? 6 : l2 <= 20 ? -5 : 0; 
+  const transportMod = Math.round((l6 - 8) * 0.15);     // car=0 baseline
+
+  const final_score  = Math.min(100, Math.max(5, l1 + timeMod + reportMod + behaviourMod + locMod + transportMod));
   const severity = severityLabel(final_score);
-  const { reasoning, factors } = buildExplanation(final_score, {crimeBase:l1,locationProfile:l2,temporalRisk:l3,reportVelocity:l4,behavioural:l5}, reportCount, locationName, hour);
+  const { reasoning, factors } = buildExplanation(final_score, {crimeBase:l1,locationProfile:l2,temporalRisk:l3,reportVelocity:l4,behavioural:l5,transportRisk:l6}, reportCount, locationName, hour);
 
   return {
     score: final_score, severity, reasoning,
     shouldTriggerSos: final_score >= SOS_THRESHOLD,
     riskFactors: factors,
-    breakdown: { crimeBase:l1, locationProfile:l2, temporalRisk:l3, reportVelocity:l4, behavioural:l5 },
-    meta: { reportCount, hour, dayOfWeek, location:locationName, computedAt:now.toISOString() },
+    breakdown: { 
+      crimeBase: l1, 
+      locationProfile: l2, 
+      temporalRisk: l3, 
+      reportVelocity: l4, // Keep for backward compatibility if needed, but we'll prioritize new keys
+      recentReports: l4, 
+      behavioural: l5,
+      transportRisk: l6
+    },
+    meta: { reportCount, hour, dayOfWeek, location:locationName, transportMode, computedAt:now.toISOString() },
   };
 }
 

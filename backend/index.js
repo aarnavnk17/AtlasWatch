@@ -151,26 +151,26 @@ const crimeStatSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const incidentSchema = new mongoose.Schema({
-  location  : { type: String, required: true, index: true },
-  latitude  : Number,
-  longitude : Number,
-  type      : { type: String, enum: ['theft','assault','harassment','fraud','suspicious','other'], default: 'other' },
-  severity  : { type: String, enum: ['low','medium','high'], default: 'medium' },
+  location: { type: String, required: true, index: true },
+  latitude: Number,
+  longitude: Number,
+  type: { type: String, enum: ['theft', 'assault', 'harassment', 'fraud', 'suspicious', 'other'], default: 'other' },
+  severity: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
   reportedBy: String,
   description: String,
-  createdAt : { type: Date, default: Date.now, index: true }
+  createdAt: { type: Date, default: Date.now, index: true }
 });
 
-const User       = mongoose.model('User', userSchema);
-const Profile    = mongoose.model('Profile', profileSchema);
-const Contact    = mongoose.model('Contact', contactSchema);
-const Document   = mongoose.model('Document', documentSchema);
-const Location   = mongoose.model('Location', locationSchema);
-const Geofence   = mongoose.model('Geofence', geofenceSchema);
-const SosAlert   = mongoose.model('SosAlert', sosAlertSchema);
+const User = mongoose.model('User', userSchema);
+const Profile = mongoose.model('Profile', profileSchema);
+const Contact = mongoose.model('Contact', contactSchema);
+const Document = mongoose.model('Document', documentSchema);
+const Location = mongoose.model('Location', locationSchema);
+const Geofence = mongoose.model('Geofence', geofenceSchema);
+const SosAlert = mongoose.model('SosAlert', sosAlertSchema);
 const AnomalyLog = mongoose.model('AnomalyLog', anomalyLogSchema);
-const CrimeStat  = mongoose.model('CrimeStat', crimeStatSchema);
-const Incident   = mongoose.model('Incident', incidentSchema);
+const CrimeStat = mongoose.model('CrimeStat', crimeStatSchema);
+const Incident = mongoose.model('Incident', incidentSchema);
 
 // ============================
 // MULTER FILE UPLOAD CONFIG
@@ -399,15 +399,17 @@ app.delete('/geofences/:id', async (req, res) => {
 app.get('/admin/anomaly-summary', async (req, res) => {
   try {
     const summary = await AnomalyLog.aggregate([
-      { $group: {
+      {
+        $group: {
           _id: '$email',
-          totalEvents:  { $sum: 1 },
+          totalEvents: { $sum: 1 },
           anomalyCount: { $sum: { $cond: ['$anomaly_flag', 1, 0] } },
-          highRiskCount:{ $sum: { $cond: [{ $eq: ['$risk_level', 'high'] }, 1, 0] } },
-          lastEvent:    { $max: '$timestamp' },
-          lastReason:   { $last: '$reason' },
-          lastRiskLevel:{ $last: '$risk_level' }
-      }},
+          highRiskCount: { $sum: { $cond: [{ $eq: ['$risk_level', 'high'] }, 1, 0] } },
+          lastEvent: { $max: '$timestamp' },
+          lastReason: { $last: '$reason' },
+          lastRiskLevel: { $last: '$risk_level' }
+        }
+      },
       { $sort: { anomalyCount: -1 } }
     ]);
     return res.json({ success: true, summary });
@@ -530,9 +532,9 @@ app.get('/crime-stats', async (req, res) => {
     let finalScore = score > 300 ? Math.floor(score / 20) : score;
 
     res.json({
-      theft:   Math.floor(finalScore / 4),
+      theft: Math.floor(finalScore / 4),
       assault: Math.floor(finalScore / 4),
-      fraud:   Math.floor(finalScore / 4)
+      fraud: Math.floor(finalScore / 4)
     });
   } catch (err) {
     console.error('CrimeStats DB Error:', err);
@@ -548,8 +550,8 @@ app.post('/register', async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ success: false, message: 'Email and password are required', error: 'Email and password are required' });
 
-  const hasUpperCase  = /[A-Z]/.test(password);
-  const hasNumber     = /[0-9]/.test(password);
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
   if (password.length < 8 || !hasUpperCase || !hasNumber || !hasSpecialChar) {
@@ -838,49 +840,49 @@ app.post('/incident-report', async (req, res) => {
 });
 
 app.get('/ai-danger-score', async (req, res) => {
-  const { location, destination, lat, lng, prolongedInactivity, geofenceBreach, geofenceZoneType, geofenceZoneName } = req.query;
-  if (!location) return res.status(400).json({ success: false, message: 'location is required' });
+    const { location, destination, lat, lng, mode, prolongedInactivity, geofenceBreach, geofenceZoneType, geofenceZoneName } = req.query;
+    if (!location) return res.status(400).json({ success: false, message: 'location is required' });
 
-  try {
-    const now = new Date();
-    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+    try {
+      const now = new Date();
+      const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
 
-    async function scoreLocation(locName, locLat, locLng) {
-      const cityKey = aiEngine.extractCity(locName);
-      const cityForQuery = cityKey || locName;
+      async function scoreLocation(locName, locLat, locLng) {
+        const cityKey = aiEngine.extractCity(locName);
+        const cityForQuery = cityKey || locName;
 
-      const reports = await Incident.countDocuments({
-        $or: [
-          { location: { $regex: new RegExp(cityForQuery.toLowerCase(), 'i') } },
-          ...(locLat && locLng ? [{
-            latitude:  { $gte: parseFloat(locLat) - 0.05, $lte: parseFloat(locLat) + 0.05 },
-            longitude: { $gte: parseFloat(locLng) - 0.05, $lte: parseFloat(locLng) + 0.05 }
-          }] : [])
-        ],
-        createdAt: { $gte: sixHoursAgo }
-      });
+        const reports = await Incident.countDocuments({
+          $or: [
+            { location: { $regex: new RegExp(cityForQuery.toLowerCase(), 'i') } },
+            ...(locLat && locLng ? [{
+              latitude: { $gte: parseFloat(locLat) - 0.05, $lte: parseFloat(locLat) + 0.05 },
+              longitude: { $gte: parseFloat(locLng) - 0.05, $lte: parseFloat(locLng) + 0.05 }
+            }] : [])
+          ],
+          createdAt: { $gte: sixHoursAgo }
+        });
 
-      let crimeScore = 0;
-      if (cityKey) {
-        const stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityKey + '$', 'i') } }).lean();
-        if (stat) crimeScore = stat.score;
+        let crimeScore = 0;
+        if (cityKey) {
+          const stat = await CrimeStat.findOne({ city: { $regex: new RegExp('^' + cityKey + '$', 'i') } }).lean();
+          if (stat) crimeScore = stat.score;
+        }
+
+        let geofenceBoost = 0;
+        if (geofenceZoneType === 'high-risk') geofenceBoost = 80;
+        if (geofenceZoneType === 'restricted') geofenceBoost = 55;
+        if (geofenceZoneType === 'safe') geofenceBoost = -20;
+
+        const flags = {
+          prolongedInactivity: prolongedInactivity === 'true',
+          geofenceBreach: geofenceBreach === 'true',
+          geofenceBoost
+        };
+
+        return aiEngine.assess({ crimeRawScore: crimeScore, locationName: locName, reportCount: reports, transportMode: mode, flags, now });
       }
 
-      let geofenceBoost = 0;
-      if (geofenceZoneType === 'high-risk')  geofenceBoost = 80;
-      if (geofenceZoneType === 'restricted') geofenceBoost = 55;
-      if (geofenceZoneType === 'safe')       geofenceBoost = -20;
-
-      const flags = {
-        prolongedInactivity: prolongedInactivity === 'true',
-        geofenceBreach:      geofenceBreach === 'true',
-        geofenceBoost
-      };
-
-      return aiEngine.assess({ crimeRawScore: crimeScore, locationName: locName, reportCount: reports, flags, now });
-    }
-
-    const startResult = await scoreLocation(location, lat, lng);
+      const startResult = await scoreLocation(location, lat, lng);
     let finalResult = startResult;
 
     if (destination && destination.trim()) {

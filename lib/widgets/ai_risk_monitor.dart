@@ -9,18 +9,19 @@ class AiRiskMonitor extends StatefulWidget {
   final double? latitude;
   final double? longitude;
   final void Function(int score, String reason)? onAutoSosTrigger;
+  final void Function(int score, String severity, String reason)? onRiskAssessed;
   final Duration pollInterval;
 
   const AiRiskMonitor({
     super.key, required this.location, this.latitude, this.longitude,
-    this.onAutoSosTrigger, this.pollInterval = const Duration(seconds: 60),
+    this.onAutoSosTrigger, this.onRiskAssessed, this.pollInterval = const Duration(seconds: 60),
   });
 
   @override
-  State<AiRiskMonitor> createState() => _AiRiskMonitorState();
+  State<AiRiskMonitor> createState() => AiRiskMonitorState();
 }
 
-class _AiRiskMonitorState extends State<AiRiskMonitor>
+class AiRiskMonitorState extends State<AiRiskMonitor>
     with TickerProviderStateMixin {
   DangerAssessment? _assessment;
   bool _loading   = true;
@@ -49,6 +50,11 @@ class _AiRiskMonitorState extends State<AiRiskMonitor>
   @override
   void dispose() { _timer?.cancel(); _pulseCtrl.dispose(); _expandCtrl.dispose(); super.dispose(); }
 
+  Future<void> refresh() async {
+    setState(() => _loading = true);
+    await _assess();
+  }
+
   Future<void> _assess() async {
     if (!mounted) return;
     final result = await AiDangerService().assess(
@@ -56,6 +62,8 @@ class _AiRiskMonitorState extends State<AiRiskMonitor>
     );
     if (!mounted) return;
     setState(() { _assessment = result; _loading = false; });
+    widget.onRiskAssessed?.call(result.score, result.severity, result.reasoning);
+    
     if (result.shouldTriggerSos && !_sosFired) {
       _sosFired = true;
       widget.onAutoSosTrigger?.call(result.score, result.reasoning);

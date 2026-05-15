@@ -31,6 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _loadingLocation = true;
   LatLng _currentLatLng = const LatLng(0, 0);
   final TextEditingController _locationController = TextEditingController();
+  final GlobalKey<AiRiskMonitorState> _aiMonitorKey = GlobalKey<AiRiskMonitorState>();
 
   @override
   void dispose() {
@@ -158,6 +159,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _refreshAll() async {
+    setState(() => _loadingLocation = true);
+    await _fetchLocationAndRisk();
+    _aiMonitorKey.currentState?.refresh();
+  }
+
+  RiskLevel _riskLevelFromSeverity(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+      case 'danger':
+        return RiskLevel.high;
+      case 'caution':
+        return RiskLevel.medium;
+      case 'safe':
+      default:
+        return RiskLevel.low;
+    }
+  }
+
   Future<void> _logout() async {
     await _session.logout();
     if (!mounted) return;
@@ -220,9 +240,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   slideOffset: const Offset(0, 0.05),
                   delay: const Duration(milliseconds: 400),
                   child: AiRiskMonitor(
+                    key: _aiMonitorKey,
                     location : _locationName!,
                     latitude : _currentLatLng.latitude  != 0 ? _currentLatLng.latitude  : null,
                     longitude: _currentLatLng.longitude != 0 ? _currentLatLng.longitude : null,
+                    onRiskAssessed: (score, severity, reason) {
+                      if (mounted) {
+                        setState(() {
+                          _riskLevel = _riskLevelFromSeverity(severity);
+                        });
+                      }
+                    },
                     onAutoSosTrigger: (int score, String reason) {
                       Navigator.push(context, MaterialPageRoute(
                         builder: (_) => SosScreen(
@@ -321,6 +349,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Row(
           children: [
             IconButton(
+              onPressed: _refreshAll,
+              icon: Icon(Icons.refresh_rounded,
+                  color: _loadingLocation ? Colors.blue : Colors.grey, size: 24),
+              tooltip: 'Refresh All',
+            ),
+            const SizedBox(width: 4),
+            IconButton(
               onPressed: _logout,
               icon: const Icon(Icons.logout_rounded, color: Colors.grey, size: 22),
               tooltip: 'Sign Out',
@@ -370,16 +405,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               if (_loadingLocation)
                 const SizedBox(width: 16, height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2))
-              else
-                IconButton(
-                  onPressed: () {
-                    setState(() => _loadingLocation = true);
-                    _fetchLocationAndRisk();
-                  },
-                  icon: const Icon(Icons.refresh, size: 20, color: Colors.grey),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
             ],
           ),
           const SizedBox(height: 16),

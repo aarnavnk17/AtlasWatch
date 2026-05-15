@@ -58,18 +58,23 @@ class DangerAssessment {
   List<SubScore> get subScores {
     final bd = breakdown;
     if (bd == null) return [];
+    
+    // Recent reports could be in 'recentReports' or 'reportVelocity' (legacy)
+    final recentReports = (bd['recentReports'] as num? ?? bd['reportVelocity'] as num? ?? 0).toInt();
+    final locProfile    = (bd['locationProfile'] as num? ?? 0).toInt();
+    
     return [
       SubScore(label: 'Crime History', icon: '🗂️',
           score: (bd['crimeBase'] as num? ?? 0).toInt().clamp(0, 100),
           detail: 'Historical crime rate for this area'),
       SubScore(label: 'Area Profile', icon: '📍',
-          score: (bd['locationProfile'] as num? ?? 0).toInt().clamp(0, 100),
-          detail: 'Known risk level of this location type'),
+          score: math.max(locProfile, recentReports).clamp(0, 100),
+          detail: 'Known risk level and recent incidents'),
       SubScore(label: 'Time of Day', icon: '🕐',
           score: (bd['temporalRisk'] as num? ?? 0).toInt().clamp(0, 100),
           detail: 'Risk based on current hour & day'),
       SubScore(label: 'Transport Risk', icon: '🚗',
-          score: (bd['reportVelocity'] as num? ?? 0).toInt().clamp(0, 100),
+          score: (bd['transportRisk'] as num? ?? 0).toInt().clamp(0, 100),
           detail: 'Vulnerability based on travel mode'),
       SubScore(label: 'Geofence', icon: '🔺',
           score: (bd['behavioural'] as num? ?? 0).toInt().clamp(0, 100),
@@ -470,10 +475,11 @@ class AiDangerService {
         if (rawEntry == null) 'City not in crime database — using default baseline',
       ],
       breakdown: {
-        'crimeBase'      : routeScore,      // reflects full route, not just origin
+        'crimeBase'      : routeScore,      
         'locationProfile': locationProfile,
         'temporalRisk'   : timeRisk,
-        'reportVelocity' : transportRisk,   // reusing this slot for transport
+        'transportRisk'  : transportRisk,   
+        'recentReports'  : 0,               // no reports in offline fallback
         'behavioural'    : geofenceRisk,
       },
       aiSource: 'offline',
